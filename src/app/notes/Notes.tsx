@@ -1,0 +1,9 @@
+import { createClient } from '@/supabase/server'
+
+// src/app/notes/Notes.tsx
+export default async function Notes() {
+  const supabase = await createClient()
+  const { data: notes } = await supabase.from('notes').select()
+
+  return <pre>{JSON.stringify(notes, null, 2)}</pre>
+}
