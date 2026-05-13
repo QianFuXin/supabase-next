@@ -11,41 +11,62 @@ type ProtectedLayoutProps = {
 
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      <div className="flex w-full flex-1 flex-col items-center gap-20">
-        <nav className="border-b-foreground/10 flex h-16 w-full justify-center border-b">
-          <div className="flex w-full max-w-5xl items-center justify-between p-3 px-5 text-sm">
-            <div className="flex items-center gap-5 font-semibold">
-              <Link href={'/'}>Next.js Supabase Starter</Link>
-            </div>
+    <div className="relative flex min-h-screen flex-col">
+      <div className="bg-dot-pattern pointer-events-none fixed inset-0 opacity-[0.03] dark:opacity-[0.05]" />
+
+      <header className="bg-background/70 sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold tracking-tight"
+          >
+            <span className="bg-foreground text-background flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold">
+              N
+            </span>
+            <span className="hidden sm:inline">NextSupabase</span>
+          </Link>
+
+          <div className="flex items-center gap-3">
             {!hasEnvVars ? (
               <EnvVarWarning />
             ) : (
-              <Suspense>
+              <Suspense fallback={<div className="h-8 w-20" />}>
                 <AuthButton />
               </Suspense>
             )}
           </div>
-        </nav>
-        <div className="flex max-w-5xl flex-1 flex-col gap-20 p-5">
-          {children}
         </div>
+      </header>
 
-        <footer className="mx-auto flex w-full items-center justify-center gap-8 border-t py-16 text-center text-xs">
-          <p>
-            Powered by{' '}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 md:px-6 md:py-10">
+        {children}
+      </main>
+
+      <footer className="mt-auto border-t">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-8 md:px-6">
+          <p className="text-muted-foreground text-xs">
+            Built with{' '}
             <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
+              href="https://supabase.com"
               target="_blank"
-              className="font-bold hover:underline"
+              className="font-medium underline underline-offset-4"
               rel="noreferrer"
             >
               Supabase
+            </a>{' '}
+            and{' '}
+            <a
+              href="https://nextjs.org"
+              target="_blank"
+              className="font-medium underline underline-offset-4"
+              rel="noreferrer"
+            >
+              Next.js
             </a>
           </p>
           <ThemeSwitcher />
-        </footer>
-      </div>
-    </main>
+        </div>
+      </footer>
+    </div>
   )
 }

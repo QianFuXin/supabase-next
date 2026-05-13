@@ -33,7 +33,6 @@ export function UpdatePasswordForm({
     try {
       const { error } = await supabase.auth.updateUser({ password })
       if (error) throw error
-      // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push('/protected')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
@@ -44,29 +43,43 @@ export function UpdatePasswordForm({
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>
-            Please enter your new password below.
+      <Card className="relative overflow-hidden border-0 shadow-lg shadow-black/5 dark:shadow-black/20">
+        <div className="via-foreground/20 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent" />
+        <CardHeader className="space-y-1 pt-8 pb-6">
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            Set new password
+          </CardTitle>
+          <CardDescription className="text-sm">
+            Enter your new password below
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleForgotPassword}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
+            <div className="flex flex-col gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs font-medium">
+                  New password
+                </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="New password"
+                  placeholder="Enter a new password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-10"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && (
+                <p className="bg-destructive/5 text-destructive rounded-md p-3 text-xs font-medium">
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="h-10 w-full"
+                disabled={isLoading}
+              >
                 {isLoading ? 'Saving...' : 'Save new password'}
               </Button>
             </div>
