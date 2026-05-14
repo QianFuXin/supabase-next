@@ -1,47 +1,144 @@
+import { createDeepAgent } from 'deepagents'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
+
+const SYSTEM_PROMPT = `You are a helpful, friendly AI assistant. You provide clear, concise, and accurate answers.
+Use markdown formatting for code blocks, lists, tables, and emphasis.
+For complex multi-step tasks, use write_todos to plan, then execute step by step.`
+
+const model = new ChatGoogleGenerativeAI({
+  model: 'gemma-4-26b-a4b-it',
+})
+
+type StreamEvent =
+  | { type: 'text'; content: string }
+  | { type: 'tool_start'; callId: string; name: string; input: unknown }
+  | {
+      type: 'tool_end'
+      callId: string
+      name: string
+      status: string
+      output?: unknown
+      error?: string
+    }
+  | { type: 'subagent_start'; name: string }
+  | { type: 'subagent_text'; name: string; content: string }
+  | { type: 'subagent_end'; name: string; status: string }
+  | { type: 'done' }
+  | { type: 'error'; error: string }
 
 export async function POST(req: Request) {
   try {
     const { question } = await req.json()
 
-    if (!question) {
+    if (!question?.trim()) {
       return Response.json(
         { error: "Missing 'question' parameter" },
         { status: 400 },
       )
     }
 
-    console.log('start invoke:', question)
-
-    const llm = new ChatGoogleGenerativeAI({
-      model: 'gemma-4-26b-a4b-it',
+    const agent = createDeepAgent({
+      model,
+      systemPrompt: SYSTEM_PROMPT,
     })
 
-    const aiMsg = await llm.invoke([
-      ['system', 'You are a helpful assistant.'],
-      ['human', question],
-    ])
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        const send = (data: StreamEvent) => {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+          )
+        }
 
-    console.log('done invoke')
+        try {
+          const run = await agent.streamEvents(
+            { messages: [{ role: 'user', content: question }] },
+            { version: 'v3' },
+          )
 
-    // ✅ 兼容 LangChain content 结构
-    let text = ''
+          await Promise.all([
+            // Coordinator message chunks
+            (async () => {
+              for await (const msg of run.messages) {
+                const text = await msg.text
+                if (text) send({ type: 'text', content: text })
+              }
+            })(),
+            // Coordinator tool calls
+            (async () => {
+              for await (const call of run.toolCalls) {
+                send({
+                  type: 'tool_start',
+                  callId: call.callId,
+                  name: call.name,
+                  input: call.input,
+                })
+                const status = await call.status
+                if (status === 'finished') {
+                  send({
+                    type: 'tool_end',
+                    callId: call.callId,
+                    name: call.name,
+                    status,
+                    output: await call.output,
+                  })
+                } else {
+                  send({
+                    type: 'tool_end',
+                    callId: call.callId,
+                    name: call.name,
+                    status,
+                    error: await call.error,
+                  })
+                }
+              }
+            })(),
+            // Subagent tasks — cast needed because generic args resolve to []
+            (async () => {
+              for await (const sub of run.subagents) {
+                const s = sub as any
+                send({ type: 'subagent_start', name: s.name })
 
-    if (typeof aiMsg.content === 'string') {
-      text = aiMsg.content
-    } else if (Array.isArray(aiMsg.content)) {
-      const last = aiMsg.content[aiMsg.content.length - 1]
-      text =
-        typeof last === 'string'
-          ? last
-          : typeof last?.text === 'string'
-            ? last.text
-            : ''
-    }
+                for await (const msg of s.messages) {
+                  const text = await msg.text
+                  if (text) {
+                    send({ type: 'subagent_text', name: s.name, content: text })
+                  }
+                }
 
-    return Response.json({ answer: text })
+                try {
+                  await s.output
+                  send({
+                    type: 'subagent_end',
+                    name: s.name,
+                    status: 'completed',
+                  })
+                } catch {
+                  send({ type: 'subagent_end', name: s.name, status: 'failed' })
+                }
+              }
+            })(),
+          ])
+
+          send({ type: 'done' })
+        } catch (err) {
+          console.error('Stream error:', err)
+          send({ type: 'error', error: 'Stream error occurred' })
+        }
+        controller.close()
+      },
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    })
   } catch (err) {
-    console.error('error:', err)
+    console.error('Error:', err)
     return Response.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
