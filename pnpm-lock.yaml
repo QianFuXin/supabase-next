@@ -17,6 +17,9 @@ importers:
       '@langchain/google-genai':
         specifier: ^2.1.26
         version: 2.1.26(@langchain/core@1.1.46(ws@8.20.0))
+      '@langchain/langgraph-checkpoint':
+        specifier: ^1.0.2
+        version: 1.0.2(@langchain/core@1.1.46(ws@8.20.0))
       '@radix-ui/react-checkbox':
         specifier: ^1.3.3
         version: 1.3.3(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

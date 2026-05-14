@@ -216,6 +216,7 @@ export default function Page() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [autoScroll, setAutoScroll] = useState(true)
+  const [threadId, setThreadId] = useState(() => crypto.randomUUID())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -276,7 +277,7 @@ export default function Page() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, thread_id: threadId }),
       })
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -455,7 +456,25 @@ export default function Page() {
             DeepAgent — Planning, Tools, Subagents
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-2">
+          <input
+            value={threadId}
+            onChange={(e) => {
+              setThreadId(e.target.value)
+              setMessages([])
+            }}
+            placeholder="Thread ID"
+            className="bg-muted/50 text-muted-foreground focus:ring-primary/30 w-32 rounded-lg border px-2 py-1 font-mono text-[10px] focus:ring-1 focus:outline-none"
+          />
+          <button
+            onClick={() => {
+              setThreadId(crypto.randomUUID())
+              setMessages([])
+            }}
+            className="text-muted-foreground hover:text-foreground text-[10px] transition-colors"
+          >
+            New
+          </button>
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />

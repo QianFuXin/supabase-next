@@ -1,5 +1,6 @@
-import { createDeepAgent } from 'deepagents'
+import { createDeepAgent, StateBackend } from 'deepagents'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
+import { MemorySaver } from '@langchain/langgraph-checkpoint'
 
 const SYSTEM_PROMPT = `You are a helpful, friendly AI assistant. You provide clear, concise, and accurate answers.
 Use markdown formatting for code blocks, lists, tables, and emphasis.
@@ -8,6 +9,9 @@ For complex multi-step tasks, use write_todos to plan, then execute step by step
 const model = new ChatGoogleGenerativeAI({
   model: 'gemma-4-26b-a4b-it',
 })
+
+const checkpointer = new MemorySaver()
+const backend = new StateBackend()
 
 type StreamEvent =
   | { type: 'text'; content: string }
@@ -28,9 +32,23 @@ type StreamEvent =
   | { type: 'done' }
   | { type: 'error'; error: string }
 
+let _agent: ReturnType<typeof createDeepAgent> | null = null
+
+function getAgent() {
+  if (!_agent) {
+    _agent = createDeepAgent({
+      model,
+      systemPrompt: SYSTEM_PROMPT,
+      checkpointer,
+      backend,
+    })
+  }
+  return _agent
+}
+
 export async function POST(req: Request) {
   try {
-    const { question } = await req.json()
+    const { question, thread_id } = await req.json()
 
     if (!question?.trim()) {
       return Response.json(
@@ -39,10 +57,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const agent = createDeepAgent({
-      model,
-      systemPrompt: SYSTEM_PROMPT,
-    })
+    const agent = getAgent()
 
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
@@ -56,7 +71,12 @@ export async function POST(req: Request) {
         try {
           const run = await agent.streamEvents(
             { messages: [{ role: 'user', content: question }] },
-            { version: 'v3' },
+            {
+              version: 'v3',
+              configurable: {
+                thread_id: thread_id ?? crypto.randomUUID(),
+              },
+            },
           )
 
           await Promise.all([
