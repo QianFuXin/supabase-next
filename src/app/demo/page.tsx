@@ -12,6 +12,7 @@ import {
   ArrowDown,
   Wrench,
   Bot,
+  Brain,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -39,6 +40,7 @@ interface Subagent {
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  thinking: string
   toolCalls: ToolCall[]
   subagents: Subagent[]
 }
@@ -52,6 +54,7 @@ interface StreamEvent {
   status?: string
   output?: unknown
   error?: string
+  thinking?: string
 }
 
 // --- Markdown Message Bubble ---------------------------------------
@@ -176,6 +179,36 @@ function SubagentCard({ sa }: { sa: Subagent }) {
   )
 }
 
+// --- Thinking Block -------------------------------------------------
+
+function ThinkingBlock({ content }: { content: string }) {
+  const [expanded, setExpanded] = useState(false)
+
+  if (!content) return null
+
+  return (
+    <div className="bg-card/50 my-2 rounded-xl border text-xs">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left"
+      >
+        <Brain className="h-3.5 w-3.5 shrink-0 text-purple-500" />
+        <span className="text-muted-foreground font-medium">Thinking</span>
+        {expanded ? (
+          <ChevronUp className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
+        ) : (
+          <ChevronDown className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
+        )}
+      </button>
+      {expanded && (
+        <div className="text-muted-foreground border-t px-3 py-2 text-[11px] leading-relaxed whitespace-pre-wrap">
+          {content}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // --- Main Page ------------------------------------------------------
 
 export default function Page() {
@@ -212,13 +245,20 @@ export default function Page() {
     const assistantMsg: Message = {
       role: 'assistant',
       content: '',
+      thinking: '',
       toolCalls: [],
       subagents: [],
     }
 
     setMessages((prev) => [
       ...prev,
-      { role: 'user', content: question, toolCalls: [], subagents: [] },
+      {
+        role: 'user',
+        content: question,
+        thinking: '',
+        toolCalls: [],
+        subagents: [],
+      },
       assistantMsg,
     ])
 
@@ -272,6 +312,13 @@ export default function Page() {
                 }))
                 break
 
+              case 'thinking':
+                updateAssistant((m) => ({
+                  ...m,
+                  thinking: m.thinking + (event.content ?? ''),
+                }))
+                break
+
               case 'tool_start':
                 updateAssistant((m) => ({
                   ...m,
@@ -311,6 +358,17 @@ export default function Page() {
                     ...m.subagents,
                     { name: event.name!, content: '', status: 'running' },
                   ],
+                }))
+                break
+
+              case 'subagent_thinking':
+                updateAssistant((m) => ({
+                  ...m,
+                  subagents: m.subagents.map((sa) =>
+                    sa.name === event.name && sa.status === 'running'
+                      ? { ...sa, content: sa.content + (event.content ?? '') }
+                      : sa,
+                  ),
                 }))
                 break
 
@@ -360,6 +418,7 @@ export default function Page() {
       updateAssistant(() => ({
         role: 'assistant',
         content: 'Sorry, something went wrong. Please try again.',
+        thinking: '',
         toolCalls: [],
         subagents: [],
       }))
@@ -472,6 +531,9 @@ export default function Page() {
                           content={msg.content}
                           loading={isLoadingMsg(msg)}
                         />
+
+                        {/* Thinking */}
+                        <ThinkingBlock content={msg.thinking} />
 
                         {/* Tool calls */}
                         {msg.toolCalls.length > 0 && (

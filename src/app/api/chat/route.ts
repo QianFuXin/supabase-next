@@ -11,6 +11,7 @@ const model = new ChatGoogleGenerativeAI({
 
 type StreamEvent =
   | { type: 'text'; content: string }
+  | { type: 'thinking'; content: string }
   | { type: 'tool_start'; callId: string; name: string; input: unknown }
   | {
       type: 'tool_end'
@@ -21,6 +22,7 @@ type StreamEvent =
       error?: string
     }
   | { type: 'subagent_start'; name: string }
+  | { type: 'subagent_thinking'; name: string; content: string }
   | { type: 'subagent_text'; name: string; content: string }
   | { type: 'subagent_end'; name: string; status: string }
   | { type: 'done' }
@@ -58,11 +60,17 @@ export async function POST(req: Request) {
           )
 
           await Promise.all([
-            // Coordinator message chunks
+            // Coordinator message chunks — iterate token by token
             (async () => {
               for await (const msg of run.messages) {
-                const text = await msg.text
-                if (text) send({ type: 'text', content: text })
+                // Thinking / reasoning content (streaming)
+                for await (const token of msg.reasoning) {
+                  if (token) send({ type: 'thinking', content: token })
+                }
+                // Regular text content (streaming)
+                for await (const token of msg.text) {
+                  if (token) send({ type: 'text', content: token })
+                }
               }
             })(),
             // Coordinator tool calls
@@ -94,16 +102,30 @@ export async function POST(req: Request) {
                 }
               }
             })(),
-            // Subagent tasks — cast needed because generic args resolve to []
+            // Subagent tasks
             (async () => {
               for await (const sub of run.subagents) {
                 const s = sub as any
                 send({ type: 'subagent_start', name: s.name })
 
                 for await (const msg of s.messages) {
-                  const text = await msg.text
-                  if (text) {
-                    send({ type: 'subagent_text', name: s.name, content: text })
+                  // Subagent thinking / reasoning content
+                  for await (const token of msg.reasoning) {
+                    if (token)
+                      send({
+                        type: 'subagent_thinking',
+                        name: s.name,
+                        content: token,
+                      })
+                  }
+                  // Subagent text content
+                  for await (const token of msg.text) {
+                    if (token)
+                      send({
+                        type: 'subagent_text',
+                        name: s.name,
+                        content: token,
+                      })
                   }
                 }
 
