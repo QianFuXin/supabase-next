@@ -1,3 +1,4 @@
+import { createClient } from '@/supabase/server'
 import { createDeepAgent, StateBackend } from 'deepagents'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 import { MemorySaver } from '@langchain/langgraph-checkpoint'
@@ -48,6 +49,12 @@ function getAgent() {
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.auth.getClaims()
+    if (error || !data?.claims) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { question, thread_id } = await req.json()
 
     if (!question?.trim()) {

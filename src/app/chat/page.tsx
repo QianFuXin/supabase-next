@@ -449,9 +449,7 @@ export default function Page() {
           <Sparkles className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            AI Agent Demo
-          </h1>
+          <h1 className="text-lg font-semibold tracking-tight">AI Chat</h1>
           <p className="text-muted-foreground text-xs">
             DeepAgent — Planning, Tools, Subagents
           </p>
