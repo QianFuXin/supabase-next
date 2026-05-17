@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Next.js 16 (App Router) + Supabase starter kit with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
+Next.js 16 (App Router) + Supabase AI Chat app with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
 
 ## Commands
 
@@ -41,11 +41,15 @@ Pre-commit hook runs `lint-staged` (ESLint + Prettier on staged files) then `typ
 
 ### Auth flow
 
-- `src/app/auth/login/` — Login page
-- `src/app/auth/sign-up/` — Sign up page
-- `src/app/auth/confirm/route.ts` — OTP/token confirmation handler (checks `token_hash` and `type` query params, calls `supabase.auth.verifyOtp`)
+- `src/app/auth/login/` — Login page, redirects to `/chat` on success
+- `src/app/auth/sign-up/` — Sign up page, redirects to `/chat` on success
+- `src/app/auth/confirm/route.ts` — OTP/token confirmation handler (checks `token_hash` and `type` query params, calls `supabase.auth.verifyOtp`), redirects to `/chat`
 - `src/app/auth/forgot-password/` and `src/app/auth/update-password/` — Password reset pages
-- `src/app/protected/` — Pages gated by both middleware redirect and server-side auth check (calls `supabase.auth.getClaims()` and redirects if null)
+
+### Chat (DeepAgent)
+
+- `src/app/chat/page.tsx` — Main chat UI with streaming markdown, thinking blocks, tool call cards, and subagent cards
+- `src/app/api/chat/route.ts` — SSE streaming endpoint using `deepagents` and `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`. Uses `MemorySaver` for conversation checkpoints.
 
 ### Providers (client-side wrappers)
 
@@ -56,12 +60,11 @@ Both are composed in the root layout: `ThemeProvider > ReactQueryProvider > {chi
 
 ### Data fetching pattern
 
-TanStack React Query is used for client-side data fetching. Hooks like `useGetMessage` define query keys and use `axios` for the fetch (Next-patched `fetch` causes issues with MSW). Server components fetch directly via the Supabase server client.
+TanStack React Query is used for client-side data fetching. Server components fetch directly via the Supabase server client. The chat page uses a raw `fetch` with SSE streaming for real-time AI responses.
 
 ### Testing
 
 - **Vitest** with **jsdom** environment, global test APIs enabled
-- **MSW v2** intercepts network requests in tests. Handlers defined in `src/mocks/handlers.ts`, auto-started/stopped in `vitest.setup.ts`
 - `src/test/test-utils.tsx` exports a custom `render` that wraps components in `QueryClientProvider` with `retry: false`. Re-exports everything from `@testing-library/react` plus `userEvent`
 - Test files use `.test.tsx`/`.test.ts` suffix, co-located with the code they test
 

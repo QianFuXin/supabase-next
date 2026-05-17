@@ -1,18 +1,10 @@
 {
-  "name": "supa-next-starter",
-  "description": "A production ready Next.js/Supabase starter. ",
+  "name": "ai-chat",
+  "description": "AI Chat powered by DeepAgent",
   "version": "1.0.0",
   "private": true,
-  "author": "Michael Troya <hi@michaeltroya.ca> (@michaeltroya)",
+  "author": "QianFuXin",
   "license": "MIT",
-  "keywords": [
-    "nextjs",
-    "starter",
-    "supabase",
-    "tailwindcss",
-    "shadcn",
-    "typescript"
-  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

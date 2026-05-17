@@ -12,9 +12,9 @@ export default function Page() {
             className="flex items-center gap-2 font-semibold tracking-tight"
           >
             <span className="bg-foreground text-background flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold">
-              N
+              A
             </span>
-            <span>NextSupabase</span>
+            <span>AI Chat</span>
           </Link>
         </div>
         <LoginForm />
