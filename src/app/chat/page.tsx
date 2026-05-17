@@ -80,7 +80,7 @@ const MarkdownMessage = memo(function MarkdownMessage({
   }
 
   return (
-    <div className="prose dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-li:my-0.5 prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-4 prose-pre:text-sm prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-xs prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-pre:prose-code:text-sm prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-4 prose-headings:mb-2 max-w-none">
+    <div className="prose dark:prose-invert prose-p:my-3 prose-p:leading-relaxed prose-li:my-0.5 prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-4 prose-pre:text-sm prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-xs prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-pre:prose-code:text-sm prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-6 prose-headings:mb-3 prose-hr:my-6 prose-hr:border-muted-foreground/20 max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -176,7 +176,7 @@ function SubagentCard({ sa }: { sa: Subagent }) {
       </div>
       {sa.content && (
         <div className="border-t px-3 py-2">
-          <div className="prose prose-xs dark:prose-invert prose-p:my-1 prose-p:leading-relaxed prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-2 prose-pre:text-[11px] prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-[10px] prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 max-w-none">
+          <div className="prose prose-xs dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-2 prose-pre:text-[11px] prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-[10px] prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-headings:mt-4 prose-headings:mb-2 prose-hr:my-4 prose-hr:border-muted-foreground/20 max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
