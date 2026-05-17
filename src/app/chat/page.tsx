@@ -1,11 +1,20 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback, memo } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  memo,
+  type ComponentPropsWithoutRef,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -21,6 +30,8 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Copy,
+  Check,
 } from 'lucide-react'
 
 // --- Types ---------------------------------------------------------
@@ -80,16 +91,95 @@ const MarkdownMessage = memo(function MarkdownMessage({
   }
 
   return (
-    <div className="prose dark:prose-invert prose-p:my-3 prose-p:leading-relaxed prose-li:my-0.5 prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-4 prose-pre:text-sm prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-xs prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-pre:prose-code:text-sm prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-6 prose-headings:mb-3 prose-hr:my-6 prose-hr:border-muted-foreground/20 max-w-none">
+    <div className="prose dark:prose-invert prose-p:my-3 prose-p:leading-relaxed prose-li:my-0.5 prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-6 prose-headings:mb-3 prose-hr:my-6 prose-hr:border-muted-foreground/20 max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
+        components={markdownComponents}
       >
         {content}
       </ReactMarkdown>
     </div>
   )
 })
+
+// --- Code Block -----------------------------------------------------
+
+function CodeBlock({ language, code }: { language: string; code: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="my-3 overflow-hidden rounded-lg border">
+      <div className="bg-muted/80 flex items-center justify-between border-b px-4 py-1.5">
+        <span className="text-muted-foreground text-xs">
+          {language || 'text'}
+        </span>
+        <button
+          onClick={handleCopy}
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+        >
+          {copied ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <Copy className="h-3 w-3" />
+          )}
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <div className="bg-[#282c34]">
+        <SyntaxHighlighter
+          language={language}
+          style={oneDark}
+          customStyle={{
+            margin: 0,
+            borderRadius: 0,
+            background: 'transparent',
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: 'var(--font-geist-mono, ui-monospace, monospace)',
+              fontSize: '0.8rem',
+            },
+          }}
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
+    </div>
+  )
+}
+
+const markdownComponents: ComponentPropsWithoutRef<
+  typeof ReactMarkdown
+>['components'] = {
+  pre({ children }) {
+    return <>{children}</>
+  },
+  code({ className, children, ...props }) {
+    const match = /language-(\w+)/.exec(className || '')
+    const language = match ? match[1] : ''
+
+    if (language) {
+      const code = String(children).replace(/\n$/, '')
+      return <CodeBlock language={language} code={code} />
+    }
+
+    return (
+      <code
+        className="bg-muted rounded px-1 py-0.5 text-xs font-normal"
+        {...props}
+      >
+        {children}
+      </code>
+    )
+  },
+}
 
 // --- Tool Call Card -------------------------------------------------
 
@@ -176,10 +266,11 @@ function SubagentCard({ sa }: { sa: Subagent }) {
       </div>
       {sa.content && (
         <div className="border-t px-3 py-2">
-          <div className="prose prose-xs dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-2 prose-pre:text-[11px] prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-[10px] prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-headings:mt-4 prose-headings:mb-2 prose-hr:my-4 prose-hr:border-muted-foreground/20 max-w-none">
+          <div className="prose prose-xs dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-headings:mt-4 prose-headings:mb-2 prose-hr:my-4 prose-hr:border-muted-foreground/20 max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
+              components={markdownComponents}
             >
               {sa.content}
             </ReactMarkdown>
@@ -284,6 +375,31 @@ export default function Page() {
       })
     }
 
+    let pendingText = ''
+    let pendingThinking = ''
+    let flushTimer: ReturnType<typeof setTimeout> | null = null
+
+    const flushPendingContent = () => {
+      const text = pendingText
+      const thinking = pendingThinking
+      pendingText = ''
+      pendingThinking = ''
+      flushTimer = null
+
+      if (text) {
+        updateAssistant((m) => ({
+          ...m,
+          content: m.content + text,
+        }))
+      }
+      if (thinking) {
+        updateAssistant((m) => ({
+          ...m,
+          thinking: m.thinking + thinking,
+        }))
+      }
+    }
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -318,17 +434,17 @@ export default function Page() {
 
             switch (event.type) {
               case 'text':
-                updateAssistant((m) => ({
-                  ...m,
-                  content: m.content + (event.content ?? ''),
-                }))
+                pendingText += event.content ?? ''
+                if (!flushTimer) {
+                  flushTimer = setTimeout(flushPendingContent, 50)
+                }
                 break
 
               case 'thinking':
-                updateAssistant((m) => ({
-                  ...m,
-                  thinking: m.thinking + (event.content ?? ''),
-                }))
+                pendingThinking += event.content ?? ''
+                if (!flushTimer) {
+                  flushTimer = setTimeout(flushPendingContent, 50)
+                }
                 break
 
               case 'tool_start':
@@ -435,6 +551,10 @@ export default function Page() {
         subagents: [],
       }))
     } finally {
+      if (flushTimer) {
+        clearTimeout(flushTimer)
+        flushPendingContent()
+      }
       setLoading(false)
     }
   }
