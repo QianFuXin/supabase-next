@@ -47,6 +47,7 @@
     "clsx": "^2.1.1",
     "deepagents": "^1.10.2",
     "geist": "^1.7.0",
+    "katex": "^0.16.47",
     "langchain": "^1.4.0",
     "langsmith": "^0.6.3",
     "lucide-react": "^0.562.0",
@@ -57,7 +58,9 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "tailwind-merge": "^3.5.0",
     "undici": "^8.0.2",
     "zod": "^4.4.3"

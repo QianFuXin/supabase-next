@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -77,8 +80,13 @@ const MarkdownMessage = memo(function MarkdownMessage({
   }
 
   return (
-    <div className="prose prose-sm dark:prose-invert [&_pre]:bg-card [&_code]:bg-muted [&_blockquote]:border-muted-foreground/30 [&_blockquote]:text-muted-foreground max-w-none [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_img]:rounded-lg [&_ol]:list-decimal [&_ol]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:p-4 [&_pre]:text-sm [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-sm [&_table]:text-xs [&_td]:border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:px-2 [&_th]:py-1 [&_ul]:list-disc [&_ul]:pl-5">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    <div className="prose dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-li:my-0.5 prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-4 prose-pre:text-sm prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-xs prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-pre:prose-code:text-sm prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-4 prose-headings:mb-2 max-w-none">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   )
 })
@@ -168,8 +176,11 @@ function SubagentCard({ sa }: { sa: Subagent }) {
       </div>
       {sa.content && (
         <div className="border-t px-3 py-2">
-          <div className="prose prose-sm dark:prose-invert max-w-none text-xs [&_code]:text-[10px] [&_pre]:p-2 [&_pre]:text-[11px]">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <div className="prose prose-xs dark:prose-invert prose-p:my-1 prose-p:leading-relaxed prose-pre:bg-card prose-pre:border prose-pre:rounded-lg prose-pre:p-2 prose-pre:text-[11px] prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-code:text-[10px] prose-code:font-normal prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+            >
               {sa.content}
             </ReactMarkdown>
           </div>
@@ -442,9 +453,9 @@ export default function Page() {
     msg.toolCalls.length === 0
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-4rem)] max-w-3xl flex-col px-4 py-6">
+    <div className="mx-auto flex h-screen max-w-3xl flex-col px-4 pt-8 pb-4">
       {/* Header */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-6 flex shrink-0 items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 shadow-sm">
           <Sparkles className="h-5 w-5 text-white" />
         </div>
@@ -485,7 +496,7 @@ export default function Page() {
       <Card
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto border-0 shadow-none"
+        className="min-h-0 flex-1 overflow-y-auto border shadow-sm"
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 text-center">
@@ -589,14 +600,14 @@ export default function Page() {
             scrollToBottom()
             setAutoScroll(true)
           }}
-          className="bg-card absolute bottom-24 left-1/2 z-10 -translate-x-1/2 rounded-full border p-2 shadow-lg transition-all hover:scale-105"
+          className="bg-card absolute bottom-28 left-1/2 z-10 -translate-x-1/2 rounded-full border p-2 shadow-lg transition-all hover:scale-105"
         >
           <ArrowDown className="text-muted-foreground h-4 w-4" />
         </button>
       )}
 
       {/* Input Area */}
-      <div className="mt-3 shrink-0">
+      <div className="mt-4 shrink-0">
         <Card className="border shadow-lg">
           <div className="flex items-end gap-3 p-3">
             <textarea

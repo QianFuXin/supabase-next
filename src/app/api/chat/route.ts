@@ -87,17 +87,21 @@ export async function POST(req: Request) {
           )
 
           await Promise.all([
-            // Coordinator message chunks — iterate token by token
+            // Coordinator message chunks — run reasoning + text concurrently
             (async () => {
               for await (const msg of run.messages) {
-                // Thinking / reasoning content (streaming)
-                for await (const token of msg.reasoning) {
-                  if (token) send({ type: 'thinking', content: token })
-                }
-                // Regular text content (streaming)
-                for await (const token of msg.text) {
-                  if (token) send({ type: 'text', content: token })
-                }
+                await Promise.all([
+                  (async () => {
+                    for await (const token of msg.reasoning) {
+                      if (token) send({ type: 'thinking', content: token })
+                    }
+                  })(),
+                  (async () => {
+                    for await (const token of msg.text) {
+                      if (token) send({ type: 'text', content: token })
+                    }
+                  })(),
+                ])
               }
             })(),
             // Coordinator tool calls
@@ -136,24 +140,28 @@ export async function POST(req: Request) {
                 send({ type: 'subagent_start', name: s.name })
 
                 for await (const msg of s.messages) {
-                  // Subagent thinking / reasoning content
-                  for await (const token of msg.reasoning) {
-                    if (token)
-                      send({
-                        type: 'subagent_thinking',
-                        name: s.name,
-                        content: token,
-                      })
-                  }
-                  // Subagent text content
-                  for await (const token of msg.text) {
-                    if (token)
-                      send({
-                        type: 'subagent_text',
-                        name: s.name,
-                        content: token,
-                      })
-                  }
+                  await Promise.all([
+                    (async () => {
+                      for await (const token of msg.reasoning) {
+                        if (token)
+                          send({
+                            type: 'subagent_thinking',
+                            name: s.name,
+                            content: token,
+                          })
+                      }
+                    })(),
+                    (async () => {
+                      for await (const token of msg.text) {
+                        if (token)
+                          send({
+                            type: 'subagent_text',
+                            name: s.name,
+                            content: token,
+                          })
+                      }
+                    })(),
+                  ])
                 }
 
                 try {
