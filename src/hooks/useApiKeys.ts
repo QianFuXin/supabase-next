@@ -7,7 +7,7 @@ import {
   createApiKey,
   updateApiKey,
   deleteApiKey,
-} from '@/app/apikeys/actions'
+} from '@/app/(dashboard)/apikeys/actions'
 import type { CreateApiKeyInput, UpdateApiKeyInput } from '@/types/apikeys'
 
 const APIKEYS_QUERY_KEY = 'apikeys'

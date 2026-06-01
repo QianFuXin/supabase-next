@@ -6,7 +6,6 @@ import { Analytics } from '@vercel/analytics/react'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './globals.css'
 import ReactQueryProvider from '@/providers/ReactQueryProvider'
-import { Navbar } from '@/components/navbar'
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -40,7 +39,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <ReactQueryProvider>
-            <Navbar />
             {children}
             <Analytics />
             <ReactQueryDevtools initialIsOpen={false} />

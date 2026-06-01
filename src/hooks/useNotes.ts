@@ -7,7 +7,7 @@ import {
   createNote,
   updateNote,
   deleteNote,
-} from '@/app/notes/actions'
+} from '@/app/(dashboard)/notes/actions'
 import type { CreateNoteInput, UpdateNoteInput } from '@/types/notes'
 
 const NOTES_QUERY_KEY = 'notes'
