@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utils/tailwind'
-import { MessageSquare, FileText } from 'lucide-react'
+import { MessageSquare, FileText, Key } from 'lucide-react'
 
 const links = [
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/notes', label: 'Notes', icon: FileText },
+  { href: '/apikeys', label: 'API Keys', icon: Key },
 ]
 
 export function NavLinks() {
