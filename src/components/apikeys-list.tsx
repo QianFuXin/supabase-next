@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ApiKeyCard } from './apikey-card'
 import { ApiKeyForm } from './apikey-form'
+import { ConfirmDialog } from './confirm-dialog'
 import {
   useApiKeys,
   useCreateApiKey,
@@ -20,11 +21,16 @@ import type {
 export function ApiKeysList() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingApiKey, setEditingApiKey] = useState<ApiKey | null>(null)
+  const [deletingApiKeyId, setDeletingApiKeyId] = useState<string | null>(null)
 
   const { data: apikeys, isLoading, error } = useApiKeys()
   const createApiKey = useCreateApiKey()
   const updateApiKey = useUpdateApiKey()
   const deleteApiKey = useDeleteApiKey()
+
+  const deletingApiKey = deletingApiKeyId
+    ? apikeys?.find((k) => k.id === deletingApiKeyId)
+    : null
 
   const handleCreateClick = () => {
     setEditingApiKey(null)
@@ -37,7 +43,15 @@ export function ApiKeysList() {
   }
 
   const handleDeleteClick = (id: string) => {
-    deleteApiKey.mutate(id)
+    setDeletingApiKeyId(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deletingApiKeyId) {
+      deleteApiKey.mutate(deletingApiKeyId, {
+        onSuccess: () => setDeletingApiKeyId(null),
+      })
+    }
   }
 
   const handleFormSubmit = (data: CreateApiKeyInput | UpdateApiKeyInput) => {
@@ -126,6 +140,22 @@ export function ApiKeysList() {
         onOpenChange={setIsFormOpen}
         onSubmit={handleFormSubmit}
         isSubmitting={isSubmitting}
+      />
+
+      <ConfirmDialog
+        open={!!deletingApiKeyId}
+        onOpenChange={(open) => {
+          if (!open) setDeletingApiKeyId(null)
+        }}
+        title="Delete API key"
+        description={
+          deletingApiKey
+            ? `Are you sure you want to delete "${deletingApiKey.name}"? All systems using this key will lose access immediately. This action cannot be undone.`
+            : 'Are you sure you want to delete this API key? This action cannot be undone.'
+        }
+        confirmText="Delete"
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteApiKey.isPending}
       />
     </div>
   )

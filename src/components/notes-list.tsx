@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NoteCard } from './note-card'
 import { NoteForm } from './note-form'
+import { ConfirmDialog } from './confirm-dialog'
 import {
   useNotes,
   useCreateNote,
@@ -16,11 +17,16 @@ import type { Note, CreateNoteInput, UpdateNoteInput } from '@/types/notes'
 export function NotesList() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
 
   const { data: notes, isLoading, error } = useNotes()
   const createNote = useCreateNote()
   const updateNote = useUpdateNote()
   const deleteNote = useDeleteNote()
+
+  const deletingNote = deletingNoteId
+    ? notes?.find((n) => n.id === deletingNoteId)
+    : null
 
   const handleCreateClick = () => {
     setEditingNote(null)
@@ -33,7 +39,15 @@ export function NotesList() {
   }
 
   const handleDeleteClick = (id: string) => {
-    deleteNote.mutate(id)
+    setDeletingNoteId(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deletingNoteId) {
+      deleteNote.mutate(deletingNoteId, {
+        onSuccess: () => setDeletingNoteId(null),
+      })
+    }
   }
 
   const handleFormSubmit = (data: CreateNoteInput | UpdateNoteInput) => {
@@ -122,6 +136,22 @@ export function NotesList() {
         onOpenChange={setIsFormOpen}
         onSubmit={handleFormSubmit}
         isSubmitting={isSubmitting}
+      />
+
+      <ConfirmDialog
+        open={!!deletingNoteId}
+        onOpenChange={(open) => {
+          if (!open) setDeletingNoteId(null)
+        }}
+        title="Delete note"
+        description={
+          deletingNote
+            ? `Are you sure you want to delete "${deletingNote.title}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this note? This action cannot be undone.'
+        }
+        confirmText="Delete"
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteNote.isPending}
       />
     </div>
   )
