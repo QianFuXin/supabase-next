@@ -123,7 +123,3 @@ The `hasEnvVars` check in `src/utils/env.ts` determines if Supabase auth is acti
 3. **Pre-commit runs both lint and type-check** — Always run `pnpm type-check` before committing to catch type errors early
 4. **Path alias consistency** — Use `@/` prefix for all imports from `src/` directory
 5. **Tailwind v4** — Uses `@tailwindcss/postcss` plugin, not traditional tailwind.config.js
-
-## Existing Instruction Files
-
-- `CLAUDE.md` — Contains same architecture info (this file supplements it with agent-specific guidance)
