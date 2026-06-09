@@ -6,8 +6,8 @@ import { cn } from '@/utils/tailwind'
 import { MessageSquare, FileText, Key, Sparkles } from 'lucide-react'
 
 const links = [
-  { href: '/chat', label: 'Chat', icon: MessageSquare },
-  { href: '/gemma-demo', label: 'Gemma Demo', icon: Sparkles },
+  { href: '/deep-agent', label: 'Deep Agent', icon: MessageSquare },
+  { href: '/chat', label: 'Chat', icon: Sparkles },
   { href: '/notes', label: 'Notes', icon: FileText },
   { href: '/apikeys', label: 'API Keys', icon: Key },
 ]

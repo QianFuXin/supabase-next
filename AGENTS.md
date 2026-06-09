@@ -4,7 +4,7 @@ Compact guide for OpenCode sessions working in this repository.
 
 ## Project Overview
 
-Next.js 16 (App Router) + Supabase AI Chat app with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
+Next.js 16 (App Router) + Supabase gent app with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
 
 ## Commands
 
@@ -37,15 +37,20 @@ pnpm test:ci          # Vitest single run (CI mode)
 
 ### Auth Flow
 
-- `src/app/auth/login/` — Login, redirects to `/chat` on success
-- `src/app/auth/sign-up/` — Sign up, redirects to `/chat` on success
+- `src/app/auth/login/` — Login, redirects to `/deep-agent` on success
+- `src/app/auth/sign-up/` — Sign up, redirects to `/deep-agent` on success
 - `src/app/auth/confirm/route.ts` — OTP/token confirmation (checks `token_hash` and `type` query params)
 - `src/app/auth/forgot-password/` and `src/app/auth/update-password/` — Password reset
 
-### Chat (DeepAgent)
+### Chat (Gemma 4)
 
-- `src/app/chat/page.tsx` — Main chat UI with streaming markdown
-- `src/app/api/chat/route.ts` — SSE streaming endpoint using `deepagents` and `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`. Uses `MemorySaver` for conversation checkpoints.
+- `src/app/chat/page.tsx` — Simple chat UI with Gemma 4 model
+- `src/app/api/chat/route.ts` — API endpoint using `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`.
+
+### Deep Agent (DeepAgent)
+
+- `src/app/deep-agent/page.tsx` — Main chat UI with streaming markdown, thinking blocks, tool call cards, and subagent cards
+- `src/app/api/deep-agent/route.ts` — SSE streaming endpoint using `deepagents` and `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`. Uses `MemorySaver` for conversation checkpoints.
 
 ### Providers (client-side wrappers)
 
@@ -84,9 +89,11 @@ Server actions use `supabase.auth.getClaims()` for auth, then query the `notes` 
 ```
 src/
 ├── app/              # Next.js App Router pages and layouts
-│   ├── api/chat/     # SSE streaming endpoint
+│   ├── api/chat/     # Gemma 4 chat endpoint
+│   ├── api/deep-agent/ # SSE streaming endpoint
 │   ├── auth/         # Auth pages (login, signup, etc.)
-│   └── chat/         # Main chat UI
+│   ├── chat/         # Gemma 4 chat UI
+│   └── deep-agent/   # Deep Agent UI
 ├── components/       # React components (auth forms, theme switcher)
 │   └── ui/           # shadcn/ui components
 ├── hooks/            # Custom React hooks (useNotes.ts for TanStack React Query)

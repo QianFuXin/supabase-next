@@ -13,8 +13,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: 'AI Chat',
-  description: 'AI Chat powered by DeepAgent',
+  title: 'gent',
+  description: 'gent powered by DeepAgent',
 }
 
 const geistSans = Geist({

@@ -14,7 +14,7 @@ export default function Page() {
             <span className="bg-foreground text-background flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold">
               A
             </span>
-            <span>AI Chat</span>
+            <span>gent</span>
           </Link>
         </div>
         <UpdatePasswordForm />

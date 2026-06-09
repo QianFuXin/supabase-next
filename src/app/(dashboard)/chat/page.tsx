@@ -1,560 +1,61 @@
 'use client'
 
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  memo,
-  type ComponentPropsWithoutRef,
-} from 'react'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Sparkles, Send, Loader2, Bot, User, AlertCircle } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import 'katex/dist/katex.min.css'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import {
-  User,
-  Sparkles,
-  Send,
-  ArrowDown,
-  Wrench,
-  Bot,
-  Brain,
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Copy,
-  Check,
-} from 'lucide-react'
-
-// --- Types ---------------------------------------------------------
-
-interface ToolCall {
-  callId: string
-  name: string
-  input: unknown
-  status: 'running' | 'finished' | 'error'
-  output?: unknown
-  error?: string
-}
-
-interface Subagent {
-  name: string
-  content: string
-  status: 'running' | 'completed' | 'failed'
-}
 
 interface Message {
   role: 'user' | 'assistant'
-  content: string
-  thinking: string
-  toolCalls: ToolCall[]
-  subagents: Subagent[]
+  content: string | Array<{ type: string; text?: string }>
 }
 
-interface StreamEvent {
-  type: string
-  content?: string
-  callId?: string
-  name?: string
-  input?: unknown
-  status?: string
-  output?: unknown
-  error?: string
-  thinking?: string
-}
-
-// --- Markdown Message Bubble ---------------------------------------
-
-const MarkdownMessage = memo(function MarkdownMessage({
-  content,
-  loading,
-}: {
-  content: string
-  loading: boolean
-}) {
-  if (loading) {
-    return (
-      <span className="inline-flex items-center gap-1">
-        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:0ms]" />
-        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
-        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
-      </span>
-    )
-  }
-
-  return (
-    <div className="prose dark:prose-invert prose-p:my-3 prose-p:leading-relaxed prose-li:my-0.5 prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:text-muted-foreground prose-blockquote:pl-4 prose-blockquote:my-3 prose-img:rounded-lg prose-table:text-xs prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1 prose-ol:pl-5 prose-ul:pl-5 prose-headings:mt-6 prose-headings:mb-3 prose-hr:my-6 prose-hr:border-muted-foreground/20 max-w-none">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
-        components={markdownComponents}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
-  )
-})
-
-// --- Code Block -----------------------------------------------------
-
-function CodeBlock({ language, code }: { language: string; code: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  return (
-    <div className="my-3 overflow-hidden rounded-lg border">
-      <div className="bg-muted/80 flex items-center justify-between border-b px-4 py-1.5">
-        <span className="text-muted-foreground text-xs">
-          {language || 'text'}
-        </span>
-        <button
-          onClick={handleCopy}
-          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
-        >
-          {copied ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
-      </div>
-      <div className="bg-[#282c34]">
-        <SyntaxHighlighter
-          language={language}
-          style={oneDark}
-          customStyle={{
-            margin: 0,
-            borderRadius: 0,
-            background: 'transparent',
-          }}
-          codeTagProps={{
-            style: {
-              fontFamily: 'var(--font-geist-mono, ui-monospace, monospace)',
-              fontSize: '0.8rem',
-            },
-          }}
-        >
-          {code}
-        </SyntaxHighlighter>
-      </div>
-    </div>
-  )
-}
-
-const markdownComponents: ComponentPropsWithoutRef<
-  typeof ReactMarkdown
->['components'] = {
-  pre({ children }) {
-    return <>{children}</>
-  },
-  code({ className, children, ...props }) {
-    const match = /language-(\w+)/.exec(className || '')
-    const language = match ? match[1] : ''
-
-    if (language) {
-      const code = String(children).replace(/\n$/, '')
-      return <CodeBlock language={language} code={code} />
-    }
-
-    return (
-      <code
-        className="bg-muted rounded px-1 py-0.5 text-xs font-normal"
-        {...props}
-      >
-        {children}
-      </code>
-    )
-  },
-}
-
-// --- Tool Call Card -------------------------------------------------
-
-function ToolCallCard({ tc }: { tc: ToolCall }) {
-  const [expanded, setExpanded] = useState(false)
-  const friendlyName = tc.name.replace(/_/g, ' ')
-
-  return (
-    <div className="bg-card hover:border-primary/30 my-2 rounded-xl border text-xs transition-colors">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left"
-      >
-        {tc.status === 'running' ? (
-          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-blue-500" />
-        ) : tc.status === 'finished' ? (
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-        ) : (
-          <XCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />
-        )}
-        <Wrench className="text-muted-foreground h-3 w-3 shrink-0" />
-        <span className="font-medium">{friendlyName}</span>
-        <span className="text-muted-foreground ml-auto">
-          {tc.status === 'running'
-            ? 'Running...'
-            : tc.status === 'finished'
-              ? 'Done'
-              : 'Failed'}
-        </span>
-        {expanded ? (
-          <ChevronUp className="text-muted-foreground h-3 w-3 shrink-0" />
-        ) : (
-          <ChevronDown className="text-muted-foreground h-3 w-3 shrink-0" />
-        )}
-      </button>
-      {expanded && (
-        <div className="space-y-1.5 border-t px-3 py-2">
-          <div>
-            <span className="text-muted-foreground">Input: </span>
-            <code className="bg-muted rounded px-1 py-0.5 text-[11px]">
-              {JSON.stringify(tc.input)}
-            </code>
-          </div>
-          {tc.output !== undefined && (
-            <div>
-              <span className="text-muted-foreground">Output: </span>
-              <span className="line-clamp-4">{String(tc.output)}</span>
-            </div>
-          )}
-          {tc.error && (
-            <div className="text-red-500">
-              <span className="text-muted-foreground">Error: </span>
-              {tc.error}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// --- Subagent Card --------------------------------------------------
-
-function SubagentCard({ sa }: { sa: Subagent }) {
-  return (
-    <div className="bg-card my-2 rounded-xl border text-xs">
-      <div className="flex items-center gap-2 px-3 py-2">
-        {sa.status === 'running' ? (
-          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-blue-500" />
-        ) : sa.status === 'completed' ? (
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-        ) : (
-          <XCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />
-        )}
-        <Bot className="text-muted-foreground h-3 w-3 shrink-0" />
-        <span className="font-medium">Subagent: {sa.name}</span>
-        <span className="text-muted-foreground ml-auto">
-          {sa.status === 'running'
-            ? 'Running...'
-            : sa.status === 'completed'
-              ? 'Completed'
-              : 'Failed'}
-        </span>
-      </div>
-      {sa.content && (
-        <div className="border-t px-3 py-2">
-          <div className="prose prose-xs dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-headings:mt-4 prose-headings:mb-2 prose-hr:my-4 prose-hr:border-muted-foreground/20 max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-              components={markdownComponents}
-            >
-              {sa.content}
-            </ReactMarkdown>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// --- Thinking Block -------------------------------------------------
-
-function ThinkingBlock({ content }: { content: string }) {
-  const [expanded, setExpanded] = useState(false)
-
-  if (!content) return null
-
-  return (
-    <div className="bg-card/50 my-2 rounded-xl border text-xs">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left"
-      >
-        <Brain className="h-3.5 w-3.5 shrink-0 text-purple-500" />
-        <span className="text-muted-foreground font-medium">Thinking</span>
-        {expanded ? (
-          <ChevronUp className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
-        ) : (
-          <ChevronDown className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
-        )}
-      </button>
-      {expanded && (
-        <div className="text-muted-foreground border-t px-3 py-2 text-[11px] leading-relaxed whitespace-pre-wrap">
-          {content}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// --- Main Page ------------------------------------------------------
-
-export default function Page() {
-  const [messages, setMessages] = useState<Message[]>([])
+export default function GemmaDemoPage() {
   const [input, setInput] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
-  const [autoScroll, setAutoScroll] = useState(true)
-  const [threadId, setThreadId] = useState(() => crypto.randomUUID())
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
-
-  useEffect(() => {
-    if (autoScroll) scrollToBottom()
-  }, [messages, autoScroll, scrollToBottom])
-
-  const handleScroll = useCallback(() => {
-    const el = scrollContainerRef.current
-    if (!el) return
-    const { scrollTop, scrollHeight, clientHeight } = el
-    setAutoScroll(scrollHeight - scrollTop - clientHeight < 80)
-  }, [])
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
     if (!input.trim() || loading) return
 
-    const question = input.trim()
+    const userMessage = input.trim()
     setInput('')
+    setError(null)
     setLoading(true)
-    setAutoScroll(true)
 
-    const assistantMsg: Message = {
-      role: 'assistant',
-      content: '',
-      thinking: '',
-      toolCalls: [],
-      subagents: [],
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: 'user',
-        content: question,
-        thinking: '',
-        toolCalls: [],
-        subagents: [],
-      },
-      assistantMsg,
-    ])
-
-    const assistantIndex = messages.length + 1
-
-    const updateAssistant = (fn: (msg: Message) => Message) => {
-      setMessages((prev) => {
-        const next = [...prev]
-        next[assistantIndex] = fn({ ...next[assistantIndex]! })
-        return next
-      })
-    }
-
-    let pendingText = ''
-    let pendingThinking = ''
-    let flushTimer: ReturnType<typeof setTimeout> | null = null
-
-    const flushPendingContent = () => {
-      const text = pendingText
-      const thinking = pendingThinking
-      pendingText = ''
-      pendingThinking = ''
-      flushTimer = null
-
-      if (text) {
-        updateAssistant((m) => ({
-          ...m,
-          content: m.content + text,
-        }))
-      }
-      if (thinking) {
-        updateAssistant((m) => ({
-          ...m,
-          thinking: m.thinking + thinking,
-        }))
-      }
-    }
+    setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
 
     try {
-      const res = await fetch('/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, thread_id: threadId }),
+        body: JSON.stringify({ message: userMessage }),
       })
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await response.json()
 
-      const reader = res.body?.getReader()
-      if (!reader) throw new Error('No response body')
-
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const payload = line.slice(6)
-
-          if (payload === '[DONE]') continue
-
-          try {
-            const event: StreamEvent = JSON.parse(payload)
-
-            switch (event.type) {
-              case 'text':
-                pendingText += event.content ?? ''
-                if (!flushTimer) {
-                  flushTimer = setTimeout(flushPendingContent, 50)
-                }
-                break
-
-              case 'thinking':
-                pendingThinking += event.content ?? ''
-                if (!flushTimer) {
-                  flushTimer = setTimeout(flushPendingContent, 50)
-                }
-                break
-
-              case 'tool_start':
-                updateAssistant((m) => ({
-                  ...m,
-                  toolCalls: [
-                    ...m.toolCalls,
-                    {
-                      callId: event.callId!,
-                      name: event.name!,
-                      input: event.input,
-                      status: 'running',
-                    },
-                  ],
-                }))
-                break
-
-              case 'tool_end':
-                updateAssistant((m) => ({
-                  ...m,
-                  toolCalls: m.toolCalls.map((tc) =>
-                    tc.callId === event.callId
-                      ? {
-                          ...tc,
-                          status:
-                            (event.status as ToolCall['status']) ?? 'error',
-                          output: event.output,
-                          error: event.error,
-                        }
-                      : tc,
-                  ),
-                }))
-                break
-
-              case 'subagent_start':
-                updateAssistant((m) => ({
-                  ...m,
-                  subagents: [
-                    ...m.subagents,
-                    { name: event.name!, content: '', status: 'running' },
-                  ],
-                }))
-                break
-
-              case 'subagent_thinking':
-                updateAssistant((m) => ({
-                  ...m,
-                  subagents: m.subagents.map((sa) =>
-                    sa.name === event.name && sa.status === 'running'
-                      ? { ...sa, content: sa.content + (event.content ?? '') }
-                      : sa,
-                  ),
-                }))
-                break
-
-              case 'subagent_text':
-                updateAssistant((m) => ({
-                  ...m,
-                  subagents: m.subagents.map((sa) =>
-                    sa.name === event.name && sa.status === 'running'
-                      ? { ...sa, content: sa.content + (event.content ?? '') }
-                      : sa,
-                  ),
-                }))
-                break
-
-              case 'subagent_end':
-                updateAssistant((m) => ({
-                  ...m,
-                  subagents: m.subagents.map((sa) =>
-                    sa.name === event.name
-                      ? {
-                          ...sa,
-                          status:
-                            (event.status as Subagent['status']) ?? 'failed',
-                        }
-                      : sa,
-                  ),
-                }))
-                break
-
-              case 'error':
-                updateAssistant((m) => ({
-                  ...m,
-                  content: `Error: ${event.error}`,
-                }))
-                break
-
-              case 'done':
-                break
-            }
-          } catch {
-            // skip unparseable chunks
-          }
-        }
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response')
       }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: data.content },
+      ])
     } catch (err) {
-      console.error(err)
-      updateAssistant(() => ({
-        role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
-        thinking: '',
-        toolCalls: [],
-        subagents: [],
-      }))
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
-      if (flushTimer) {
-        clearTimeout(flushTimer)
-        flushPendingContent()
-      }
       setLoading(false)
     }
   }
@@ -566,204 +67,223 @@ export default function Page() {
     }
   }
 
-  const isLoadingMsg = (msg: Message) =>
-    loading &&
-    msg.role === 'assistant' &&
-    !msg.content &&
-    msg.toolCalls.length === 0
-
   return (
-    <div className="mx-auto flex h-screen max-w-3xl flex-col px-4 pt-8 pb-4">
+    <div className="mx-auto max-w-4xl px-4 py-8">
       {/* Header */}
-      <div className="mb-6 flex shrink-0 items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 shadow-sm">
-          <Sparkles className="h-5 w-5 text-white" />
+      <div className="mb-8 text-center">
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg">
+          <Sparkles className="h-8 w-8 text-white" />
         </div>
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">AI Chat</h1>
-          <p className="text-muted-foreground text-xs">
-            DeepAgent — Planning, Tools, Subagents
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <input
-            value={threadId}
-            onChange={(e) => {
-              setThreadId(e.target.value)
-              setMessages([])
-            }}
-            placeholder="Thread ID"
-            className="bg-muted/50 text-muted-foreground focus:ring-primary/30 w-32 rounded-lg border px-2 py-1 font-mono text-[10px] focus:ring-1 focus:outline-none"
-          />
-          <button
-            onClick={() => {
-              setThreadId(crypto.randomUUID())
-              setMessages([])
-            }}
-            className="text-muted-foreground hover:text-foreground text-[10px] transition-colors"
-          >
-            New
-          </button>
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-          </span>
-          <span className="text-muted-foreground text-xs">Online</span>
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Chat</h1>
+        <p className="text-muted-foreground mx-auto mb-4 max-w-lg">
+          A simple demo of LangChain&apos;s ChatGoogleGenerativeAI integration
+          using the gemma-4-26b-a4b-it model with API key authentication.
+        </p>
+        <div className="flex items-center justify-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            Model: gemma-4-26b-a4b-it
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            Auth: API Key
+          </Badge>
         </div>
       </div>
 
-      {/* Messages */}
-      <Card
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="min-h-0 flex-1 overflow-y-auto border shadow-sm"
-      >
-        {messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center px-4 text-center">
-            <div className="from-muted to-muted/50 mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br shadow-inner">
-              <Sparkles className="text-muted-foreground/60 h-10 w-10" />
-            </div>
-            <h2 className="mb-2 text-xl font-semibold tracking-tight">
-              Start a conversation
-            </h2>
-            <p className="text-muted-foreground max-w-sm text-sm leading-relaxed text-balance">
-              The AI agent can plan with todos, use filesystem tools, and spawn
-              subagents for complex tasks. Ask me anything!
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {[
-                'Plan a trip to Tokyo for 5 days',
-                'Compare TypeScript and Python with code examples',
-                'Write a short story about a robot learning to paint',
-              ].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setInput(suggestion)}
-                  className="bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded-full border px-3.5 py-1.5 text-xs transition-colors"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4 px-2 pb-4">
-            {messages.map((msg, i) => (
-              <div key={i}>
-                <div
-                  className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                >
-                  <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                      msg.role === 'user'
-                        ? 'bg-secondary'
-                        : 'bg-gradient-to-br from-emerald-400 to-blue-500'
-                    }`}
-                  >
-                    {msg.role === 'user' ? (
-                      <User className="text-secondary-foreground h-4 w-4" />
-                    ) : (
-                      <Sparkles className="h-3.5 w-3.5 text-white" />
-                    )}
-                  </div>
-                  <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground max-w-[75%] rounded-tr-md'
-                        : 'bg-muted/60 max-w-[85%] rounded-tl-md'
-                    }`}
-                  >
-                    {msg.role === 'assistant' ? (
-                      <>
-                        <MarkdownMessage
-                          content={msg.content}
-                          loading={isLoadingMsg(msg)}
-                        />
+      {/* Main Chat Card */}
+      <Card className="border shadow-lg">
+        <CardHeader className="bg-muted/30 border-b">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bot className="h-5 w-5 text-purple-500" />
+            Chat with Gemma 4
+          </CardTitle>
+          <CardDescription>
+            Ask questions and get responses powered by Google&apos;s Gemma 4
+            model
+          </CardDescription>
+        </CardHeader>
 
-                        {/* Thinking */}
-                        <ThinkingBlock content={msg.thinking} />
-
-                        {/* Tool calls */}
-                        {msg.toolCalls.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            {msg.toolCalls.map((tc) => (
-                              <ToolCallCard key={tc.callId} tc={tc} />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Subagents */}
-                        {msg.subagents.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            {msg.subagents.map((sa) => (
-                              <SubagentCard key={sa.name} sa={sa} />
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                  </div>
+        <CardContent className="p-0">
+          {/* Messages Area */}
+          <div className="max-h-[500px] min-h-[300px] overflow-y-auto p-4">
+            {messages.length === 0 ? (
+              <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                <div className="bg-muted mb-4 rounded-full p-4">
+                  <Bot className="text-muted-foreground h-8 w-8" />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  Start a conversation by typing a message below
+                </p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {[
+                    'Explain quantum computing',
+                    'Write a haiku about AI',
+                    'What are the benefits of TypeScript?',
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => setInput(suggestion)}
+                      className="bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-full px-3 py-1.5 text-xs transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
+            ) : (
+              <div className="space-y-4">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex gap-3 ${
+                      msg.role === 'user' ? 'flex-row-reverse' : ''
+                    }`}
+                  >
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                        msg.role === 'user'
+                          ? 'bg-secondary'
+                          : 'bg-gradient-to-br from-purple-500 to-blue-600'
+                      }`}
+                    >
+                      {msg.role === 'user' ? (
+                        <User className="text-secondary-foreground h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4 text-white" />
+                      )}
+                    </div>
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground rounded-tr-md'
+                          : 'bg-muted prose dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-pre:my-2 prose-code:text-xs rounded-tl-md'
+                      }`}
+                    >
+                      {msg.role === 'assistant' ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {typeof msg.content === 'string'
+                            ? msg.content
+                            : Array.isArray(msg.content)
+                              ? msg.content
+                                  .filter(
+                                    (
+                                      part,
+                                    ): part is { type: string; text: string } =>
+                                      typeof part === 'object' &&
+                                      part !== null &&
+                                      'text' in part,
+                                  )
+                                  .map((part) => part.text)
+                                  .join('')
+                              : String(msg.content)}
+                        </ReactMarkdown>
+                      ) : (
+                        <p className="whitespace-pre-wrap">
+                          {typeof msg.content === 'string'
+                            ? msg.content
+                            : Array.isArray(msg.content)
+                              ? msg.content
+                                  .filter(
+                                    (
+                                      part,
+                                    ): part is { type: string; text: string } =>
+                                      typeof part === 'object' &&
+                                      part !== null &&
+                                      'text' in part,
+                                  )
+                                  .map((part) => part.text)
+                                  .join('')
+                              : String(msg.content)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-600">
+                      <Bot className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="bg-muted flex items-center gap-1 rounded-2xl rounded-tl-md px-4 py-3 text-sm">
+                      <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full" />
+                      <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
+                      <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="border-t p-4">
+            <div className="flex items-end gap-3">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message..."
+                rows={2}
+                disabled={loading}
+                className="min-h-[80px] flex-1 resize-none"
+              />
+              <Button
+                onClick={handleSubmit}
+                disabled={loading || !input.trim()}
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 text-white shadow-md transition-all hover:shadow-lg"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <p className="text-muted-foreground/60 mt-2 text-center text-xs">
+              Press Enter to send · Shift + Enter for new line
+            </p>
+          </div>
+        </CardContent>
       </Card>
 
-      {/* Scroll to bottom button */}
-      {!autoScroll && messages.length > 0 && (
-        <button
-          onClick={() => {
-            scrollToBottom()
-            setAutoScroll(true)
-          }}
-          className="bg-card absolute bottom-28 left-1/2 z-10 -translate-x-1/2 rounded-full border p-2 shadow-lg transition-all hover:scale-105"
-        >
-          <ArrowDown className="text-muted-foreground h-4 w-4" />
-        </button>
-      )}
-
-      {/* Input Area */}
-      <div className="mt-4 shrink-0">
-        <Card className="border shadow-lg">
-          <div className="flex items-end gap-3 p-3">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask anything..."
-              rows={2}
-              disabled={loading}
-              className="placeholder:text-muted-foreground/60 flex-1 resize-none bg-transparent p-2 text-sm focus:outline-none disabled:opacity-50"
-            />
-            <Button
-              onClick={handleSubmit}
-              disabled={loading || !input.trim()}
-              size="icon"
-              className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 text-white shadow-sm transition-all hover:shadow-md hover:brightness-105"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Info Section */}
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <Card className="border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">API Reference</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              This demo uses LangChain&apos;s{' '}
+              <code className="bg-muted rounded px-1 py-0.5 text-[10px]">
+                @langchain/google-genai
+              </code>{' '}
+              package with the ChatGoogleGenerativeAI class. Authentication is
+              handled via the GOOGLE_API_KEY environment variable.
+            </p>
+          </CardContent>
         </Card>
-        <p className="text-muted-foreground/50 mt-2 text-center text-[10px]">
-          Press{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Enter
-          </kbd>{' '}
-          to send ·{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Shift
-          </kbd>{' '}
-          +{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Enter
-          </kbd>{' '}
-          for new line
-        </p>
+
+        <Card className="border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Model Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              <strong>gemma-4-26b-a4b-it</strong> is a 26 billion parameter
+              model in Google&apos;s Gemma 4 series. It supports text generation
+              with a context window suitable for most conversational tasks.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

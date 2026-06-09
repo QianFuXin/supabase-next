@@ -9,7 +9,7 @@ export default function Home() {
           <Sparkles className="h-10 w-10 text-white" />
         </div>
         <h1 className="mb-4 text-4xl leading-tight font-bold tracking-tight text-balance md:text-5xl">
-          AI Chat
+          gent
         </h1>
         <p className="text-muted-foreground mb-10 max-w-md text-base leading-relaxed text-balance">
           Powered by DeepAgent with planning, tools, and subagents for complex
@@ -17,7 +17,7 @@ export default function Home() {
         </p>
         <div className="flex items-center gap-3">
           <Link
-            href="/chat"
+            href="/deep-agent"
             className="bg-foreground text-background hover:bg-foreground/90 inline-flex h-11 items-center rounded-lg px-8 text-sm font-medium transition-colors"
           >
             Start chatting

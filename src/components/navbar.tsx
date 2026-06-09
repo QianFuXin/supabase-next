@@ -15,7 +15,7 @@ export function Navbar() {
             <span className="bg-foreground text-background flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold">
               A
             </span>
-            <span className="hidden sm:inline">AI Chat</span>
+            <span className="hidden sm:inline">gent</span>
           </Link>
           <NavLinks />
         </div>

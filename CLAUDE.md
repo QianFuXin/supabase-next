@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Next.js 16 (App Router) + Supabase AI Chat app with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
+Next.js 16 (App Router) + Supabase gent app with TypeScript, Tailwind CSS 4, shadcn/ui, and TanStack React Query.
 
 ## Commands
 
@@ -41,15 +41,20 @@ Pre-commit hook runs `lint-staged` (ESLint + Prettier on staged files) then `typ
 
 ### Auth flow
 
-- `src/app/auth/login/` — Login page, redirects to `/chat` on success
-- `src/app/auth/sign-up/` — Sign up page, redirects to `/chat` on success
-- `src/app/auth/confirm/route.ts` — OTP/token confirmation handler (checks `token_hash` and `type` query params, calls `supabase.auth.verifyOtp`), redirects to `/chat`
+- `src/app/auth/login/` — Login page, redirects to `/deep-agent` on success
+- `src/app/auth/sign-up/` — Sign up page, redirects to `/deep-agent` on success
+- `src/app/auth/confirm/route.ts` — OTP/token confirmation handler (checks `token_hash` and `type` query params, calls `supabase.auth.verifyOtp`), redirects to `/deep-agent`
 - `src/app/auth/forgot-password/` and `src/app/auth/update-password/` — Password reset pages
 
-### Chat (DeepAgent)
+### Chat (Gemma 4)
 
-- `src/app/chat/page.tsx` — Main chat UI with streaming markdown, thinking blocks, tool call cards, and subagent cards
-- `src/app/api/chat/route.ts` — SSE streaming endpoint using `deepagents` and `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`. Uses `MemorySaver` for conversation checkpoints.
+- `src/app/chat/page.tsx` — Simple chat UI with Gemma 4 model
+- `src/app/api/chat/route.ts` — API endpoint using `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`.
+
+### Deep Agent (DeepAgent)
+
+- `src/app/deep-agent/page.tsx` — Main chat UI with streaming markdown, thinking blocks, tool call cards, and subagent cards
+- `src/app/api/deep-agent/route.ts` — SSE streaming endpoint using `deepagents` and `@langchain/google-genai` (Gemma 4). Auth-protected via `supabase.auth.getClaims()`. Uses `MemorySaver` for conversation checkpoints.
 
 ### Providers (client-side wrappers)
 
