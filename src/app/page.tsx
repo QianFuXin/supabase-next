@@ -100,7 +100,7 @@ export default function Home() {
         <div className="absolute -bottom-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-violet-500/10 blur-3xl" />
       </div>
 
-      <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
+      <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 py-16 text-center md:py-24">
         <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400 via-blue-500 to-violet-500 shadow-2xl shadow-emerald-500/20">
           <Sparkles className="h-12 w-12 text-white" />
         </div>
@@ -110,7 +110,7 @@ export default function Home() {
           Powered by Gemini AI
         </Badge>
 
-        <h1 className="mb-6 text-5xl leading-tight font-bold tracking-tight text-balance md:text-7xl">
+        <h1 className="mb-6 text-3xl leading-tight font-bold tracking-tight text-balance sm:text-5xl md:text-7xl">
           <span className="bg-gradient-to-r from-emerald-400 via-blue-500 to-violet-500 bg-clip-text text-transparent">
             Intelligent Agents
           </span>
@@ -118,13 +118,13 @@ export default function Home() {
           Built for the Future
         </h1>
 
-        <p className="text-muted-foreground mb-10 max-w-2xl text-lg leading-relaxed text-balance md:text-xl">
+        <p className="text-muted-foreground mb-8 max-w-2xl text-base leading-relaxed text-balance sm:mb-10 sm:text-lg md:text-xl">
           Create powerful AI agents with advanced reasoning, tool use, and
           subagent orchestration. Built with Gemini for complex problem-solving
           tasks.
         </p>
 
-        <div className="mb-16 flex flex-col items-center gap-4 sm:flex-row">
+        <div className="mb-10 flex flex-col items-center gap-4 sm:mb-16 sm:flex-row">
           <Link href="/deep-agent">
             <Button size="lg" className="gap-2 px-8">
               Start Building
@@ -190,13 +190,13 @@ export default function Home() {
         </div>
       </main>
 
-      <section className="bg-muted/30 relative border-t py-24">
+      <section className="bg-muted/30 relative border-t py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+          <div className="mb-12 text-center md:mb-16">
+            <h2 className="mb-4 text-2xl font-bold md:text-4xl">
               Built for Complex Reasoning
             </h2>
-            <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+            <p className="text-muted-foreground mx-auto max-w-2xl text-base md:text-lg">
               Our AI agents combine advanced reasoning with tool use to tackle
               sophisticated tasks
             </p>
@@ -223,17 +223,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative py-24">
+      <section className="relative py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <Badge variant="outline" className="mb-4">
                 Technical Architecture
               </Badge>
-              <h2 className="mb-6 text-3xl font-bold md:text-4xl">
+              <h2 className="mb-4 text-2xl font-bold md:mb-6 md:text-4xl">
                 Full-Stack AI Platform
               </h2>
-              <p className="text-muted-foreground mb-8 text-lg">
+              <p className="text-muted-foreground mb-6 text-base md:mb-8 md:text-lg">
                 Built with modern technologies for performance, security, and
                 scalability.
               </p>
@@ -277,7 +277,7 @@ export default function Home() {
 
             <div className="relative">
               <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-emerald-400/10 to-blue-500/10 blur-xl" />
-              <div className="bg-background/80 relative rounded-2xl border p-8 backdrop-blur-xl">
+              <div className="bg-background/80 relative rounded-2xl border p-6 backdrop-blur-xl md:p-8">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -321,23 +321,23 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative border-t py-24">
+      <section className="relative border-t py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4 text-center md:px-6">
-          <h2 className="mb-6 text-3xl font-bold md:text-4xl">
+          <h2 className="mb-4 text-2xl font-bold md:mb-6 md:text-4xl">
             Ready to Build Intelligent Agents?
           </h2>
-          <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
+          <p className="text-muted-foreground mx-auto mb-6 max-w-2xl text-base md:mb-8 md:text-lg">
             Start creating powerful AI agents with Gemini. No setup required.
           </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link href="/deep-agent">
-              <Button size="lg" className="gap-2 px-8">
+              <Button size="lg" className="gap-2 px-6 md:px-8">
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/auth/sign-up">
-              <Button variant="outline" size="lg" className="px-8">
+              <Button variant="outline" size="lg" className="px-6 md:px-8">
                 Create Account
               </Button>
             </Link>
@@ -346,14 +346,14 @@ export default function Home() {
       </section>
 
       <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-8 md:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-6 sm:flex-row sm:justify-between md:px-6 md:py-8">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-blue-500">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <span className="font-semibold">gent</span>
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-center text-xs sm:text-sm">
             Built with Next.js, Supabase & Gemini AI
           </p>
         </div>

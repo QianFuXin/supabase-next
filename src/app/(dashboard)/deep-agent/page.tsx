@@ -573,19 +573,13 @@ export default function Page() {
     msg.toolCalls.length === 0
 
   return (
-    <div className="mx-auto flex h-screen max-w-3xl flex-col px-4 pt-8 pb-4">
+    <div className="mx-auto flex h-dvh max-w-3xl flex-col px-3 pt-4 pb-3 sm:px-4 sm:pt-8 sm:pb-4">
       {/* Header */}
-      <div className="mb-6 flex shrink-0 items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 shadow-sm">
-          <Sparkles className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Deep Agent</h1>
-          <p className="text-muted-foreground text-xs">
-            DeepAgent — Planning, Tools, Subagents
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
+      <div className="mb-4 flex shrink-0 items-center gap-2 sm:mb-6 sm:gap-3">
+        <h1 className="text-base font-semibold tracking-tight sm:text-lg">
+          Deep Agent
+        </h1>
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <input
             value={threadId}
             onChange={(e) => {
@@ -593,7 +587,7 @@ export default function Page() {
               setMessages([])
             }}
             placeholder="Thread ID"
-            className="bg-muted/50 text-muted-foreground focus:ring-primary/30 w-32 rounded-lg border px-2 py-1 font-mono text-[10px] focus:ring-1 focus:outline-none"
+            className="bg-muted/50 text-muted-foreground focus:ring-primary/30 w-20 rounded-lg border px-1.5 py-1 font-mono text-[9px] focus:ring-1 focus:outline-none sm:w-32 sm:px-2 sm:text-[10px]"
           />
           <button
             onClick={() => {
@@ -608,7 +602,9 @@ export default function Page() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-muted-foreground text-xs">Online</span>
+          <span className="text-muted-foreground hidden text-xs sm:inline">
+            Online
+          </span>
         </div>
       </div>
 
@@ -620,31 +616,10 @@ export default function Page() {
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 text-center">
-            <div className="from-muted to-muted/50 mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br shadow-inner">
-              <Sparkles className="text-muted-foreground/60 h-10 w-10" />
-            </div>
-            <h2 className="mb-2 text-xl font-semibold tracking-tight">
-              Start a conversation
-            </h2>
-            <p className="text-muted-foreground max-w-sm text-sm leading-relaxed text-balance">
-              The AI agent can plan with todos, use filesystem tools, and spawn
-              subagents for complex tasks. Ask me anything!
+            <Sparkles className="text-muted-foreground/60 h-8 w-8" />
+            <p className="text-muted-foreground mt-2 text-sm">
+              Ask me anything
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {[
-                'Plan a trip to Tokyo for 5 days',
-                'Compare TypeScript and Python with code examples',
-                'Write a short story about a robot learning to paint',
-              ].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setInput(suggestion)}
-                  className="bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded-full border px-3.5 py-1.5 text-xs transition-colors"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           <div className="space-y-4 px-2 pb-4">
@@ -727,9 +702,9 @@ export default function Page() {
       )}
 
       {/* Input Area */}
-      <div className="mt-4 shrink-0">
+      <div className="mt-3 shrink-0 sm:mt-4">
         <Card className="border shadow-lg">
-          <div className="flex items-end gap-3 p-3">
+          <div className="flex items-end gap-2 p-2 sm:gap-3 sm:p-3">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -749,21 +724,6 @@ export default function Page() {
             </Button>
           </div>
         </Card>
-        <p className="text-muted-foreground/50 mt-2 text-center text-[10px]">
-          Press{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Enter
-          </kbd>{' '}
-          to send ·{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Shift
-          </kbd>{' '}
-          +{' '}
-          <kbd className="bg-muted rounded px-1 py-0.5 text-[10px] font-medium">
-            Enter
-          </kbd>{' '}
-          for new line
-        </p>
       </div>
     </div>
   )

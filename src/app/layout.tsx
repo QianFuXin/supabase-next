@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import NextTopLoader from 'nextjs-toploader'
@@ -15,6 +15,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: 'gent',
   description: 'gent powered by DeepAgent',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 }
 
 const geistSans = Geist({

@@ -89,16 +89,19 @@ export function ApiKeysList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">API Keys</h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+            API Keys
+          </h1>
           <p className="text-muted-foreground text-sm">
             {apikeys?.length || 0} {apikeys?.length === 1 ? 'key' : 'keys'}
           </p>
         </div>
-        <Button onClick={handleCreateClick} className="gap-2">
+        <Button onClick={handleCreateClick} className="shrink-0 gap-2">
           <Plus className="h-4 w-4" />
-          New API Key
+          <span className="hidden sm:inline">New API Key</span>
+          <span className="sm:hidden">New</span>
         </Button>
       </div>
 

@@ -85,16 +85,19 @@ export function NotesList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Notes</h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+            My Notes
+          </h1>
           <p className="text-muted-foreground text-sm">
             {notes?.length || 0} {notes?.length === 1 ? 'note' : 'notes'}
           </p>
         </div>
-        <Button onClick={handleCreateClick} className="gap-2">
+        <Button onClick={handleCreateClick} className="shrink-0 gap-2">
           <Plus className="h-4 w-4" />
-          New Note
+          <span className="hidden sm:inline">New Note</span>
+          <span className="sm:hidden">New</span>
         </Button>
       </div>
 
