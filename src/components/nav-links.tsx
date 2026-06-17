@@ -3,12 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utils/tailwind'
-import { MessageSquare, FileText, Key, Sparkles, Terminal } from 'lucide-react'
+import {
+  MessageSquare,
+  FileText,
+  Key,
+  Sparkles,
+  Terminal,
+  Wand2,
+} from 'lucide-react'
 
 const links = [
   { href: '/deep-agent', label: 'Deep Agent', icon: MessageSquare },
   { href: '/chat', label: 'Chat', icon: Sparkles },
   { href: '/prompts', label: 'Prompts', icon: Terminal },
+  { href: '/prompt-optimizer', label: 'Optimizer', icon: Wand2 },
   { href: '/notes', label: 'Notes', icon: FileText },
   { href: '/apikeys', label: 'API Keys', icon: Key },
 ]
