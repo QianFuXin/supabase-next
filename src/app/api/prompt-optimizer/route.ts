@@ -183,6 +183,11 @@ interface ChatMessage {
   content: string
 }
 
+type StreamEvent =
+  | { type: 'text'; content: string }
+  | { type: 'done' }
+  | { type: 'error'; error: string }
+
 export async function POST(req: Request) {
   try {
     const { messages } = (await req.json()) as {
@@ -232,35 +237,68 @@ export async function POST(req: Request) {
           : new AIMessage(msg.content),
       ),
     ]
-    const response = await model.invoke(langchainMessages)
+    console.log('Received messages:', langchainMessages)
 
-    let textContent: string
-    if (typeof response.content === 'string') {
-      textContent = response.content
-    } else if (Array.isArray(response.content)) {
-      textContent = response.content
-        .filter(
-          (part): part is { type: string; text: string } =>
-            typeof part === 'object' && part !== null && 'text' in part,
-        )
-        .map((part) => part.text)
-        .join('')
-    } else {
-      textContent = String(response.content)
-    }
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        const send = (data: StreamEvent) => {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+          )
+        }
 
-    return Response.json({
-      success: true,
-      content: textContent,
-      model: 'gemma-4-26b-a4b-it',
-      usage: response.usage_metadata,
+        try {
+          const llmStream = await model.stream(langchainMessages)
+
+          for await (const chunk of llmStream) {
+            if (chunk.content) {
+              const text =
+                typeof chunk.content === 'string'
+                  ? chunk.content
+                  : Array.isArray(chunk.content)
+                    ? chunk.content
+                        .filter(
+                          (part): part is { type: string; text: string } =>
+                            typeof part === 'object' &&
+                            part !== null &&
+                            'text' in part,
+                        )
+                        .map((part) => part.text)
+                        .join('')
+                    : String(chunk.content)
+
+              if (text) {
+                send({ type: 'text', content: text })
+              }
+            }
+          }
+
+          send({ type: 'done' })
+        } catch (err) {
+          console.error('Stream error:', err)
+          send({
+            type: 'error',
+            error: err instanceof Error ? err.message : 'Stream error occurred',
+          })
+        }
+        controller.close()
+      },
     })
-  } catch (error) {
-    console.error('Prompt Optimizer Error:', error)
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    })
+  } catch (err) {
+    console.error('Prompt Optimizer Error:', err)
     return Response.json(
       {
         error: 'Failed to generate response',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: err instanceof Error ? err.message : 'Unknown error',
       },
       { status: 500 },
     )

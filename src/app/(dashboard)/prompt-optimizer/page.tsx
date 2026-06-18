@@ -13,6 +13,12 @@ interface Message {
   content: string
 }
 
+interface StreamEvent {
+  type: 'text' | 'done' | 'error'
+  content?: string
+  error?: string
+}
+
 export default function PromptOptimizerPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -51,7 +57,29 @@ export default function PromptOptimizerPage() {
       ...messages,
       { role: 'user' as const, content: userMessage },
     ]
-    setMessages(newMessages)
+
+    setMessages([...newMessages, { role: 'assistant', content: '' }])
+
+    const assistantIndex = newMessages.length
+
+    let pendingText = ''
+    let flushTimer: ReturnType<typeof setTimeout> | null = null
+
+    const flushPending = () => {
+      const text = pendingText
+      pendingText = ''
+      flushTimer = null
+      if (text) {
+        setMessages((prev) => {
+          const next = [...prev]
+          next[assistantIndex] = {
+            ...next[assistantIndex]!,
+            content: next[assistantIndex]!.content + text,
+          }
+          return next
+        })
+      }
+    }
 
     try {
       const response = await fetch('/api/prompt-optimizer', {
@@ -60,19 +88,67 @@ export default function PromptOptimizerPage() {
         body: JSON.stringify({ messages: newMessages }),
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
+        const data = await response.json()
         throw new Error(data.error || 'Failed to get response')
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: data.content },
-      ])
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No response body')
+
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const payload = line.slice(6)
+
+          try {
+            const event: StreamEvent = JSON.parse(payload)
+
+            switch (event.type) {
+              case 'text':
+                pendingText += event.content ?? ''
+                if (!flushTimer) {
+                  flushTimer = setTimeout(flushPending, 30)
+                }
+                break
+
+              case 'done':
+                if (flushTimer) {
+                  clearTimeout(flushTimer)
+                  flushPending()
+                }
+                break
+
+              case 'error':
+                throw new Error(event.error || 'Stream error')
+            }
+          } catch (parseErr) {
+            if (parseErr instanceof SyntaxError) continue
+            throw parseErr
+          }
+        }
+      }
     } catch (err) {
+      if (flushTimer) {
+        clearTimeout(flushTimer)
+        flushPending()
+      }
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
+      if (flushTimer) {
+        clearTimeout(flushTimer)
+        flushPending()
+      }
       setLoading(false)
     }
   }
@@ -83,6 +159,9 @@ export default function PromptOptimizerPage() {
       handleSubmit()
     }
   }
+
+  const isStreamingEmpty = (msg: Message) =>
+    loading && msg.role === 'assistant' && !msg.content
 
   return (
     <div className="mx-auto flex h-dvh max-w-3xl flex-col px-3 pt-4 pb-3 sm:px-4 sm:pt-8 sm:pb-4">
@@ -134,29 +213,25 @@ export default function PromptOptimizerPage() {
                   }`}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className="prose dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-pre:my-2 prose-code:text-xs prose-headings:mt-4 prose-headings:mb-2 prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-4 prose-blockquote:my-3 prose-li:my-0.5 max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
+                    isStreamingEmpty(msg) ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full" />
+                        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
+                        <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
+                      </span>
+                    ) : (
+                      <div className="prose dark:prose-invert prose-p:my-2 prose-p:leading-relaxed prose-pre:my-2 prose-code:text-xs prose-headings:mt-4 prose-headings:mb-2 prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-4 prose-blockquote:my-3 prose-li:my-0.5 max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                    )
                   ) : (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
               </div>
             ))}
-            {loading && (
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-                <div className="bg-muted/60 flex items-center gap-1 rounded-2xl rounded-tl-md px-4 py-3 text-sm">
-                  <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full" />
-                  <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:150ms]" />
-                  <span className="bg-foreground/40 h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:300ms]" />
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
         )}
