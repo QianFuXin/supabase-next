@@ -25,6 +25,7 @@ interface PromptFormProps {
   onOpenChange: (open: boolean) => void
   onSubmit: (data: CreatePromptInput | UpdatePromptInput) => void
   isSubmitting?: boolean
+  initialPromptContent?: string
 }
 
 export function PromptForm({
@@ -33,13 +34,16 @@ export function PromptForm({
   onOpenChange,
   onSubmit,
   isSubmitting,
+  initialPromptContent,
 }: PromptFormProps) {
   const isEditing = !!prompt
   const [title, setTitle] = useState(() => prompt?.title ?? '')
   const [description, setDescription] = useState(
     () => prompt?.description ?? '',
   )
-  const [promptContent, setPromptContent] = useState(() => prompt?.prompt ?? '')
+  const [promptContent, setPromptContent] = useState(
+    () => prompt?.prompt ?? initialPromptContent ?? '',
+  )
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
