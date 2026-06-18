@@ -224,7 +224,7 @@ export async function POST(req: Request) {
     }
 
     const model = new ChatGoogleGenerativeAI({
-      model: 'gemma-4-26b-a4b-it',
+      model: 'gemini-3.1-flash-lite',
       apiKey: apikeys.key,
       temperature: 0.7,
       maxOutputTokens: 4096,
