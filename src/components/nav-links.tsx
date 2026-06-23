@@ -10,10 +10,12 @@ import {
   Sparkles,
   Terminal,
   Wand2,
+  Wrench,
 } from 'lucide-react'
 
 const links = [
   { href: '/deep-agent', label: 'Deep Agent', icon: MessageSquare },
+  { href: '/agents', label: 'Agents', icon: Wrench },
   { href: '/chat', label: 'Chat', icon: Sparkles },
   { href: '/prompts', label: 'Prompts', icon: Terminal },
   { href: '/prompt-optimizer', label: 'Optimizer', icon: Wand2 },
