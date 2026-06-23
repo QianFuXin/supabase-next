@@ -90,6 +90,8 @@ export async function POST(req: Request) {
             // Coordinator message chunks — run reasoning + text concurrently
             (async () => {
               for await (const msg of run.messages) {
+                if ((msg as Record<string, unknown>).node === 'tools') continue
+
                 await Promise.all([
                   (async () => {
                     for await (const token of msg.reasoning) {
