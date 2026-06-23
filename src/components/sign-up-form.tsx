@@ -34,7 +34,7 @@ export function SignUpForm({
     setError(null)
 
     if (password !== repeatPassword) {
-      setError('Passwords do not match')
+      setError('两次输入的密码不一致')
       setIsLoading(false)
       return
     }
@@ -62,10 +62,10 @@ export function SignUpForm({
         <div className="via-foreground/20 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent" />
         <CardHeader className="space-y-1 pt-8 pb-6">
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Create an account
+            创建账户
           </CardTitle>
           <CardDescription className="text-sm">
-            Enter your details to get started
+            填写信息以开始使用
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,7 +73,7 @@ export function SignUpForm({
             <div className="flex flex-col gap-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-medium">
-                  Email
+                  邮箱
                 </Label>
                 <Input
                   id="email"
@@ -87,7 +87,7 @@ export function SignUpForm({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-xs font-medium">
-                  Password
+                  密码
                 </Label>
                 <Input
                   id="password"
@@ -103,7 +103,7 @@ export function SignUpForm({
                   htmlFor="repeat-password"
                   className="text-xs font-medium"
                 >
-                  Repeat password
+                  确认密码
                 </Label>
                 <Input
                   id="repeat-password"
@@ -124,16 +124,16 @@ export function SignUpForm({
                 className="h-10 w-full"
                 disabled={isLoading}
               >
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {isLoading ? '创建中...' : '创建账户'}
               </Button>
             </div>
             <div className="text-muted-foreground mt-6 text-center text-sm">
-              Already have an account?{' '}
+              已有账户？{' '}
               <Link
                 href="/auth/login"
                 className="text-foreground font-medium underline-offset-4 hover:underline"
               >
-                Sign in
+                登录
               </Link>
             </div>
           </form>

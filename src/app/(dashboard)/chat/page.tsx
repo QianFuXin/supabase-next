@@ -87,7 +87,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           ) : (
             <Copy className="h-3 w-3" />
           )}
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? '已复制！' : '复制'}
         </button>
       </div>
       <div className="bg-[#282c34]">
@@ -258,9 +258,7 @@ function SystemPromptSelector({
                     {selectedPrompt.title}
                   </span>
                 ) : (
-                  <span className="text-muted-foreground">
-                    Default System Prompt
-                  </span>
+                  <span className="text-muted-foreground">默认系统提示词</span>
                 )}
               </span>
               <ChevronDown className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
@@ -268,7 +266,7 @@ function SystemPromptSelector({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[320px] sm:w-[400px]">
             <DropdownMenuLabel className="text-muted-foreground text-[11px] font-normal">
-              System Prompt
+              系统提示词
             </DropdownMenuLabel>
 
             <DropdownMenuItem
@@ -279,7 +277,7 @@ function SystemPromptSelector({
               )}
             >
               <Terminal className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-              <span className="flex-1">Default</span>
+              <span className="flex-1">默认</span>
               {!selectedPromptId && (
                 <Check className="h-3.5 w-3.5 text-purple-500" />
               )}
@@ -289,7 +287,7 @@ function SystemPromptSelector({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-muted-foreground text-[11px] font-normal">
-                  My Prompts {isLoading && '(loading...)'}
+                  我的提示词 {isLoading && '(加载中...)'}
                 </DropdownMenuLabel>
                 {prompts.map((prompt) => (
                   <DropdownMenuItem
@@ -307,7 +305,7 @@ function SystemPromptSelector({
                         setPreviewPrompt(prompt)
                       }}
                       className="text-muted-foreground hover:text-foreground ml-2 rounded p-0.5 opacity-0 transition-all group-hover:opacity-100"
-                      title="Preview"
+                      title="预览"
                     >
                       <Eye className="h-3.5 w-3.5" />
                     </button>
@@ -321,7 +319,7 @@ function SystemPromptSelector({
 
             {!isLoading && (!prompts || prompts.length === 0) && (
               <div className="text-muted-foreground px-2 py-3 text-center text-[11px]">
-                No prompts yet. Create one in Prompts page.
+                还没有提示词。请在提示词页面创建。
               </div>
             )}
           </DropdownMenuContent>
@@ -347,7 +345,7 @@ function SystemPromptSelector({
           )}
           <div className="bg-muted/50 max-h-[300px] overflow-y-auto rounded-lg border p-4">
             <pre className="text-muted-foreground text-xs leading-relaxed whitespace-pre-wrap">
-              {previewPrompt?.prompt || '(No prompt content)'}
+              {previewPrompt?.prompt || '（无提示词内容）'}
             </pre>
           </div>
         </DialogContent>
@@ -532,7 +530,7 @@ export default function ChatPage() {
             <Sparkles className="h-3.5 w-3.5 text-white" />
           </div>
           <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-            Chat
+            对话
           </h1>
         </div>
 
@@ -545,7 +543,7 @@ export default function ChatPage() {
             className="text-muted-foreground hover:text-foreground ml-auto h-7 gap-1 text-xs"
           >
             <Trash2 className="h-3 w-3" />
-            <span className="hidden sm:inline">Clear</span>
+            <span className="hidden sm:inline">清空</span>
           </Button>
         )}
       </div>
@@ -570,11 +568,9 @@ export default function ChatPage() {
             <div className="bg-muted/50 mb-3 flex h-14 w-14 items-center justify-center rounded-2xl">
               <Sparkles className="text-muted-foreground/50 h-7 w-7" />
             </div>
-            <p className="text-foreground text-sm font-medium">
-              Start a conversation
-            </p>
+            <p className="text-foreground text-sm font-medium">开始对话</p>
             <p className="text-muted-foreground mt-1 text-xs">
-              Your messages will build on context from previous turns.
+              您的消息将基于上下文连续对话。
             </p>
           </div>
         ) : (
@@ -621,7 +617,7 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
+              placeholder="输入消息..."
               rows={2}
               disabled={loading}
               className="placeholder:text-muted-foreground/60 flex-1 resize-none bg-transparent p-2 text-sm focus:outline-none disabled:opacity-50"

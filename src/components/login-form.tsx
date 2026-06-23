@@ -52,10 +52,10 @@ export function LoginForm({
         <div className="via-foreground/20 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent" />
         <CardHeader className="space-y-1 pt-8 pb-6">
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Welcome back
+            欢迎回来
           </CardTitle>
           <CardDescription className="text-sm">
-            Enter your email to sign in to your account
+            输入邮箱以登录您的账户
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,7 +63,7 @@ export function LoginForm({
             <div className="flex flex-col gap-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-medium">
-                  Email
+                  邮箱
                 </Label>
                 <Input
                   id="email"
@@ -78,13 +78,13 @@ export function LoginForm({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-xs font-medium">
-                    Password
+                    密码
                   </Label>
                   <Link
                     href="/auth/forgot-password"
                     className="text-muted-foreground text-xs underline-offset-4 hover:underline"
                   >
-                    Forgot password?
+                    忘记密码？
                   </Link>
                 </div>
                 <Input
@@ -106,16 +106,16 @@ export function LoginForm({
                 className="h-10 w-full"
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? '登录中...' : '登录'}
               </Button>
             </div>
             <div className="text-muted-foreground mt-6 text-center text-sm">
-              Don&apos;t have an account?{' '}
+              还没有账户？{' '}
               <Link
                 href="/auth/sign-up"
                 className="text-foreground font-medium underline-offset-4 hover:underline"
               >
-                Sign up
+                注册
               </Link>
             </div>
           </form>

@@ -27,7 +27,7 @@ export function ApiKeyCard({
   isDeleting,
 }: ApiKeyCardProps) {
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Never'
+    if (!dateString) return '永不'
     return new Date(dateString).toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'short',
@@ -55,11 +55,11 @@ export function ApiKeyCard({
                   apikey.is_active && !isExpired ? 'default' : 'secondary'
                 }
               >
-                {apikey.is_active && !isExpired ? 'Active' : 'Inactive'}
+                {apikey.is_active && !isExpired ? '启用' : '禁用'}
               </Badge>
             </div>
             <CardDescription className="mt-1 text-xs">
-              Created {formatDate(apikey.created_at)}
+              创建于 {formatDate(apikey.created_at)}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -90,10 +90,10 @@ export function ApiKeyCard({
             {apikey.key}
           </code>
           <div className="text-muted-foreground flex items-center gap-4 text-xs">
-            <span>Last used: {formatDate(apikey.last_used_at)}</span>
+            <span>最近使用: {formatDate(apikey.last_used_at)}</span>
             {apikey.expires_at && (
               <span className={isExpired ? 'text-destructive' : ''}>
-                Expires: {formatDate(apikey.expires_at)}
+                过期时间: {formatDate(apikey.expires_at)}
               </span>
             )}
           </div>

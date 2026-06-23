@@ -15,7 +15,7 @@ export function LogoutButton() {
 
   return (
     <Button onClick={logout} variant="ghost" size="sm" className="h-8">
-      Logout
+      退出登录
     </Button>
   )
 }

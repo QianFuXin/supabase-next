@@ -50,16 +50,15 @@ export function ForgotPasswordForm({
           <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
           <CardHeader className="space-y-1 pt-8 pb-6">
             <CardTitle className="text-2xl font-bold tracking-tight">
-              Check your email
+              查看邮箱
             </CardTitle>
             <CardDescription className="text-sm">
-              Password reset instructions sent
+              密码重置说明已发送
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              If you registered using your email and password, you will receive
-              a password reset email shortly.
+              如果您使用邮箱和密码注册，很快将收到一封密码重置邮件。
             </p>
           </CardContent>
         </Card>
@@ -68,10 +67,10 @@ export function ForgotPasswordForm({
           <div className="via-foreground/20 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent" />
           <CardHeader className="space-y-1 pt-8 pb-6">
             <CardTitle className="text-2xl font-bold tracking-tight">
-              Reset your password
+              重置密码
             </CardTitle>
             <CardDescription className="text-sm">
-              Enter your email and we&apos;ll send you a reset link
+              输入您的邮箱，我们将发送重置链接
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -79,7 +78,7 @@ export function ForgotPasswordForm({
               <div className="flex flex-col gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-xs font-medium">
-                    Email
+                    邮箱
                   </Label>
                   <Input
                     id="email"
@@ -101,16 +100,16 @@ export function ForgotPasswordForm({
                   className="h-10 w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Sending...' : 'Send reset link'}
+                  {isLoading ? '发送中...' : '发送重置链接'}
                 </Button>
               </div>
               <div className="text-muted-foreground mt-6 text-center text-sm">
-                Remember your password?{' '}
+                记得密码？{' '}
                 <Link
                   href="/auth/login"
                   className="text-foreground font-medium underline-offset-4 hover:underline"
                 >
-                  Sign in
+                  登录
                 </Link>
               </div>
             </form>

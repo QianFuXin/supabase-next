@@ -51,12 +51,12 @@ export function ApiKeyForm({
     setError(null)
 
     if (!name.trim()) {
-      setError('Name is required')
+      setError('名称为必填项')
       return
     }
 
     if (!isEditing && !key.trim()) {
-      setError('API Key is required')
+      setError('API 密钥为必填项')
       return
     }
 
@@ -87,40 +87,40 @@ export function ApiKeyForm({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit API Key' : 'Create API Key'}
+            {isEditing ? '编辑 API 密钥' : '创建 API 密钥'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? 'Edit your API key details below.'
-              : 'Create a new API key by filling out the form below.'}
+              ? '编辑您的 API 密钥详情。'
+              : '填写以下表单创建新 API 密钥。'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">名称</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter API key name"
+                placeholder="输入 API 密钥名称"
                 disabled={isSubmitting}
               />
             </div>
             {!isEditing && (
               <div className="grid gap-2">
-                <Label htmlFor="key">API Key</Label>
+                <Label htmlFor="key">API 密钥</Label>
                 <Input
                   id="key"
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
-                  placeholder="Enter your API key"
+                  placeholder="输入您的 API 密钥"
                   disabled={isSubmitting}
                 />
               </div>
             )}
             <div className="grid gap-2">
-              <Label htmlFor="expires_at">Expiration Date (Optional)</Label>
+              <Label htmlFor="expires_at">过期时间（可选）</Label>
               <Input
                 id="expires_at"
                 type="datetime-local"
@@ -137,7 +137,7 @@ export function ApiKeyForm({
                   onCheckedChange={(checked) => setIsActive(checked === true)}
                   disabled={isSubmitting}
                 />
-                <Label htmlFor="is_active">Active</Label>
+                <Label htmlFor="is_active">启用</Label>
               </div>
             )}
             {error && <p className="text-destructive text-sm">{error}</p>}
@@ -149,16 +149,16 @@ export function ApiKeyForm({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
                 ? isEditing
-                  ? 'Saving...'
-                  : 'Creating...'
+                  ? '保存中...'
+                  : '创建中...'
                 : isEditing
-                  ? 'Save Changes'
-                  : 'Create API Key'}
+                  ? '保存更改'
+                  : '创建 API 密钥'}
             </Button>
           </DialogFooter>
         </form>

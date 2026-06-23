@@ -40,7 +40,7 @@ export function NoteForm({
     setError(null)
 
     if (!title.trim()) {
-      setError('Title is required')
+      setError('标题为必填项')
       return
     }
 
@@ -68,32 +68,30 @@ export function NoteForm({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Note' : 'Create Note'}</DialogTitle>
+          <DialogTitle>{isEditing ? '编辑笔记' : '创建笔记'}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Edit your note details below.'
-              : 'Create a new note by filling out the form below.'}
+            {isEditing ? '编辑您的笔记详情。' : '填写以下表单创建新笔记。'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">标题</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter note title"
+                placeholder="输入笔记标题"
                 disabled={isSubmitting}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="content">Content</Label>
+              <Label htmlFor="content">内容</Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Enter note content (optional)"
+                placeholder="输入笔记内容（可选）"
                 rows={6}
                 disabled={isSubmitting}
               />
@@ -107,16 +105,16 @@ export function NoteForm({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
                 ? isEditing
-                  ? 'Saving...'
-                  : 'Creating...'
+                  ? '保存中...'
+                  : '创建中...'
                 : isEditing
-                  ? 'Save Changes'
-                  : 'Create Note'}
+                  ? '保存更改'
+                  : '创建笔记'}
             </Button>
           </DialogFooter>
         </form>

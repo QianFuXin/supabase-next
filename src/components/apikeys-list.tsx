@@ -80,9 +80,9 @@ export function ApiKeysList() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
         <p className="text-destructive text-center">
-          Failed to load API keys: {error.message}
+          加载 API 密钥失败：{error.message}
         </p>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <Button onClick={() => window.location.reload()}>重试</Button>
       </div>
     )
   }
@@ -92,16 +92,16 @@ export function ApiKeysList() {
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            API Keys
+            API 密钥
           </h1>
           <p className="text-muted-foreground text-sm">
-            {apikeys?.length || 0} {apikeys?.length === 1 ? 'key' : 'keys'}
+            {apikeys?.length || 0} {apikeys?.length === 1 ? '个密钥' : '个密钥'}
           </p>
         </div>
         <Button onClick={handleCreateClick} className="shrink-0 gap-2">
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New API Key</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">新建 API 密钥</span>
+          <span className="sm:hidden">新建</span>
         </Button>
       </div>
 
@@ -120,9 +120,9 @@ export function ApiKeysList() {
       ) : (
         <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-lg border border-dashed">
           <div className="text-center">
-            <p className="text-lg font-medium">No API keys yet</p>
+            <p className="text-lg font-medium">还没有 API 密钥</p>
             <p className="text-muted-foreground text-sm">
-              Create your first API key to get started
+              创建您的第一条 API 密钥开始使用
             </p>
           </div>
           <Button
@@ -131,7 +131,7 @@ export function ApiKeysList() {
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
-            Create API Key
+            创建 API 密钥
           </Button>
         </div>
       )}
@@ -150,13 +150,13 @@ export function ApiKeysList() {
         onOpenChange={(open) => {
           if (!open) setDeletingApiKeyId(null)
         }}
-        title="Delete API key"
+        title="删除 API 密钥"
         description={
           deletingApiKey
-            ? `Are you sure you want to delete "${deletingApiKey.name}"? All systems using this key will lose access immediately. This action cannot be undone.`
-            : 'Are you sure you want to delete this API key? This action cannot be undone.'
+            ? `确定要删除"${deletingApiKey.name}"吗？所有使用此密钥的系统将立即失去访问权限。此操作不可撤销。`
+            : '确定要删除此 API 密钥吗？此操作不可撤销。'
         }
-        confirmText="Delete"
+        confirmText="删除"
         onConfirm={handleConfirmDelete}
         isLoading={deleteApiKey.isPending}
       />

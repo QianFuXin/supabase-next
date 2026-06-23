@@ -18,30 +18,28 @@ import { Badge } from '@/components/ui/badge'
 const features = [
   {
     icon: Brain,
-    title: 'Advanced Reasoning',
-    description:
-      'Complex multi-step reasoning with planning and tool use for sophisticated problem-solving.',
+    title: '高级推理',
+    description: '支持复杂多步骤推理，结合规划与工具调用，实现高难度问题求解。',
     gradient: 'from-emerald-400 to-blue-500',
   },
   {
     icon: Zap,
-    title: 'Real-time Streaming',
+    title: '实时流式传输',
     description:
-      'Experience lightning-fast responses with Server-Sent Events for seamless AI interactions.',
+      '基于 Server-Sent Events 实现极速响应，带来流畅的 AI 交互体验。',
     gradient: 'from-amber-400 to-orange-500',
   },
   {
     icon: Shield,
-    title: 'Enterprise Security',
+    title: '企业级安全',
     description:
-      'Built-in authentication with Supabase and Row Level Security for data protection.',
+      '内置 Supabase 认证与行级安全策略（RLS），全方位保护数据安全。',
     gradient: 'from-violet-400 to-purple-500',
   },
   {
     icon: Bot,
-    title: 'Subagent Orchestration',
-    description:
-      'Intelligent task decomposition with specialized subagents for parallel execution.',
+    title: '子智能体编排',
+    description: '智能任务分解，通过专用子智能体并行执行，提升处理效率。',
     gradient: 'from-cyan-400 to-blue-500',
   },
 ]
@@ -49,18 +47,17 @@ const features = [
 const demoMessages = [
   {
     role: 'user',
-    content: 'Help me plan a product launch for our new AI assistant',
+    content: '帮我规划一下新 AI 助手的产品发布方案',
   },
   {
     role: 'assistant',
-    content:
-      "I'll break this down into phases. First, let me research the market landscape and competitor positioning...",
+    content: '我将分几个阶段来规划。首先，让我调研市场格局和竞争对手定位...',
   },
-  { role: 'user', content: 'What about the technical architecture?' },
+  { role: 'user', content: '技术架构方面怎么考虑？' },
   {
     role: 'assistant',
     content:
-      'For the technical stack, I recommend Next.js for the frontend with Supabase for real-time capabilities...',
+      '技术栈方面，我推荐前端使用 Next.js，配合 Supabase 实现实时能力...',
   },
 ]
 
@@ -106,35 +103,33 @@ export default function Home() {
         </div>
 
         <Badge variant="secondary" className="mb-6 gap-2">
-          <Cpu className="h-3 w-3" />
-          Powered by Gemini AI
+          <Cpu className="h-3 w-3" />由 Gemini AI 驱动
         </Badge>
 
         <h1 className="mb-6 text-3xl leading-tight font-bold tracking-tight text-balance sm:text-5xl md:text-7xl">
           <span className="bg-gradient-to-r from-emerald-400 via-blue-500 to-violet-500 bg-clip-text text-transparent">
-            Intelligent Agents
+            智能体
           </span>
           <br />
-          Built for the Future
+          面向未来而构建
         </h1>
 
         <p className="text-muted-foreground mb-8 max-w-2xl text-base leading-relaxed text-balance sm:mb-10 sm:text-lg md:text-xl">
-          Create powerful AI agents with advanced reasoning, tool use, and
-          subagent orchestration. Built with Gemini for complex problem-solving
-          tasks.
+          创建强大的 AI 智能体，具备高级推理、工具调用和子智能体编排能力。 基于
+          Gemini 构建，专为复杂问题求解而设计。
         </p>
 
         <div className="mb-10 flex flex-col items-center gap-4 sm:mb-16 sm:flex-row">
           <Link href="/deep-agent">
             <Button size="lg" className="gap-2 px-8">
-              Start Building
+              开始构建
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <Link href="/auth/sign-up">
             <Button variant="outline" size="lg" className="gap-2 px-8">
               <MessageSquare className="h-4 w-4" />
-              Try Demo
+              体验演示
             </Button>
           </Link>
         </div>
@@ -147,7 +142,7 @@ export default function Home() {
               <div className="h-3 w-3 rounded-full bg-yellow-500" />
               <div className="h-3 w-3 rounded-full bg-green-500" />
               <span className="text-muted-foreground ml-2 text-sm">
-                DeepAgent Chat
+                DeepAgent 对话
               </span>
             </div>
             <div className="space-y-4 text-left">
@@ -194,11 +189,10 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 md:px-6">
           <div className="mb-12 text-center md:mb-16">
             <h2 className="mb-4 text-2xl font-bold md:text-4xl">
-              Built for Complex Reasoning
+              专为复杂推理而生
             </h2>
             <p className="text-muted-foreground mx-auto max-w-2xl text-base md:text-lg">
-              Our AI agents combine advanced reasoning with tool use to tackle
-              sophisticated tasks
+              我们的 AI 智能体将高级推理与工具调用相结合，应对各种复杂任务
             </p>
           </div>
 
@@ -228,14 +222,13 @@ export default function Home() {
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <Badge variant="outline" className="mb-4">
-                Technical Architecture
+                技术架构
               </Badge>
               <h2 className="mb-4 text-2xl font-bold md:mb-6 md:text-4xl">
-                Full-Stack AI Platform
+                全栈 AI 平台
               </h2>
               <p className="text-muted-foreground mb-6 text-base md:mb-8 md:text-lg">
-                Built with modern technologies for performance, security, and
-                scalability.
+                基于现代技术栈构建，兼顾性能、安全与可扩展性。
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -245,7 +238,7 @@ export default function Home() {
                   <div>
                     <h4 className="font-medium">Next.js 16 App Router</h4>
                     <p className="text-muted-foreground text-sm">
-                      Server Components, Server Actions, and streaming SSR
+                      服务器组件、服务器操作与流式 SSR
                     </p>
                   </div>
                 </div>
@@ -254,10 +247,9 @@ export default function Home() {
                     <div className="bg-primary h-2 w-2 rounded-full" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Gemini AI Integration</h4>
+                    <h4 className="font-medium">Gemini AI 集成</h4>
                     <p className="text-muted-foreground text-sm">
-                      Advanced reasoning with tool use and subagent
-                      orchestration
+                      高级推理能力，支持工具调用与子智能体编排
                     </p>
                   </div>
                 </div>
@@ -266,9 +258,9 @@ export default function Home() {
                     <div className="bg-primary h-2 w-2 rounded-full" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Supabase Backend</h4>
+                    <h4 className="font-medium">Supabase 后端</h4>
                     <p className="text-muted-foreground text-sm">
-                      Authentication, database, and real-time subscriptions
+                      认证、数据库与实时订阅
                     </p>
                   </div>
                 </div>
@@ -284,9 +276,9 @@ export default function Home() {
                       <Brain className="h-5 w-5 text-emerald-500" />
                     </div>
                     <div>
-                      <div className="font-medium">Planning Agent</div>
+                      <div className="font-medium">规划智能体</div>
                       <div className="text-muted-foreground text-sm">
-                        Task decomposition & strategy
+                        任务分解与策略制定
                       </div>
                     </div>
                   </div>
@@ -296,9 +288,9 @@ export default function Home() {
                       <Zap className="h-5 w-5 text-blue-500" />
                     </div>
                     <div>
-                      <div className="font-medium">Execution Engine</div>
+                      <div className="font-medium">执行引擎</div>
                       <div className="text-muted-foreground text-sm">
-                        Tool use & parallel processing
+                        工具调用与并行处理
                       </div>
                     </div>
                   </div>
@@ -308,9 +300,9 @@ export default function Home() {
                       <Bot className="h-5 w-5 text-violet-500" />
                     </div>
                     <div>
-                      <div className="font-medium">Subagent Network</div>
+                      <div className="font-medium">子智能体网络</div>
                       <div className="text-muted-foreground text-sm">
-                        Specialized worker agents
+                        专用工作智能体
                       </div>
                     </div>
                   </div>
@@ -324,21 +316,21 @@ export default function Home() {
       <section className="relative border-t py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4 text-center md:px-6">
           <h2 className="mb-4 text-2xl font-bold md:mb-6 md:text-4xl">
-            Ready to Build Intelligent Agents?
+            准备好构建智能体了吗？
           </h2>
           <p className="text-muted-foreground mx-auto mb-6 max-w-2xl text-base md:mb-8 md:text-lg">
-            Start creating powerful AI agents with Gemini. No setup required.
+            立即使用 Gemini 创建强大的 AI 智能体，无需额外配置。
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link href="/deep-agent">
               <Button size="lg" className="gap-2 px-6 md:px-8">
-                Get Started Free
+                免费开始
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/auth/sign-up">
               <Button variant="outline" size="lg" className="px-6 md:px-8">
-                Create Account
+                创建账户
               </Button>
             </Link>
           </div>
@@ -354,7 +346,7 @@ export default function Home() {
             <span className="font-semibold">gent</span>
           </div>
           <p className="text-muted-foreground text-center text-xs sm:text-sm">
-            Built with Next.js, Supabase & Gemini AI
+            基于 Next.js、Supabase 和 Gemini AI 构建
           </p>
         </div>
       </footer>

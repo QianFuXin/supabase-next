@@ -267,7 +267,7 @@ export default function PromptOptimizerPage() {
     <div className="mx-auto flex h-dvh max-w-3xl flex-col px-3 pt-4 pb-3 sm:px-4 sm:pt-8 sm:pb-4">
       <div className="mb-4 flex shrink-0 items-center gap-2 sm:mb-6 sm:gap-3">
         <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-          Prompt Optimizer
+          提示词优化器
         </h1>
       </div>
 
@@ -276,7 +276,7 @@ export default function PromptOptimizerPage() {
           onClick={() => setShowSystemPrompt(!showSystemPrompt)}
           className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium"
         >
-          <span>System Prompt</span>
+          <span>系统提示词</span>
           {showSystemPrompt ? (
             <ChevronUp className="text-muted-foreground h-4 w-4" />
           ) : (

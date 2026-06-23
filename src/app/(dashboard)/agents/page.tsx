@@ -110,7 +110,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           ) : (
             <Copy className="h-3 w-3" />
           )}
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? '已复制！' : '复制'}
         </button>
       </div>
       <div className="bg-[#282c34]">
@@ -215,10 +215,10 @@ function ToolCallEntry({ tc }: { tc: ToolCall }) {
         <span className="font-medium">{friendlyName}</span>
         <span className="text-muted-foreground ml-auto">
           {tc.status === 'running'
-            ? 'Running...'
+            ? '运行中...'
             : tc.status === 'finished'
-              ? 'Done'
-              : 'Failed'}
+              ? '完成'
+              : '失败'}
         </span>
         {expanded ? (
           <ChevronUp className="text-muted-foreground h-3 w-3 shrink-0" />
@@ -229,20 +229,20 @@ function ToolCallEntry({ tc }: { tc: ToolCall }) {
       {expanded && (
         <div className="space-y-1.5 border-t px-3 py-2">
           <div>
-            <span className="text-muted-foreground">Input: </span>
+            <span className="text-muted-foreground">输入: </span>
             <code className="bg-muted rounded px-1 py-0.5 text-[11px]">
               {JSON.stringify(tc.input)}
             </code>
           </div>
           {tc.output !== undefined && (
             <div>
-              <span className="text-muted-foreground">Output: </span>
+              <span className="text-muted-foreground">输出: </span>
               <span className="line-clamp-4">{String(tc.output)}</span>
             </div>
           )}
           {tc.error && (
             <div className="text-red-500">
-              <span className="text-muted-foreground">Error: </span>
+              <span className="text-muted-foreground">错误: </span>
               {tc.error}
             </div>
           )}
@@ -264,7 +264,7 @@ function ThinkingBlock({ content }: { content: string }) {
         className="flex w-full items-center gap-2 px-3 py-2 text-left"
       >
         <Brain className="h-3.5 w-3.5 shrink-0 text-purple-500" />
-        <span className="text-muted-foreground font-medium">Thinking</span>
+        <span className="text-muted-foreground font-medium">思考中</span>
         {expanded ? (
           <ChevronUp className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
         ) : (
@@ -318,9 +318,7 @@ function SystemPromptSelector({
                   {selectedPrompt.title}
                 </span>
               ) : (
-                <span className="text-muted-foreground">
-                  Default System Prompt
-                </span>
+                <span className="text-muted-foreground">默认系统提示词</span>
               )}
             </span>
             <ChevronDown className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
@@ -328,7 +326,7 @@ function SystemPromptSelector({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[320px] sm:w-[400px]">
           <DropdownMenuLabel className="text-muted-foreground text-[11px] font-normal">
-            System Prompt
+            系统提示词
           </DropdownMenuLabel>
 
           <DropdownMenuItem
@@ -339,7 +337,7 @@ function SystemPromptSelector({
             )}
           >
             <Terminal className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-            <span className="flex-1">Default</span>
+            <span className="flex-1">默认</span>
             {!selectedPromptId && (
               <Check className="h-3.5 w-3.5 text-purple-500" />
             )}
@@ -349,7 +347,7 @@ function SystemPromptSelector({
             <>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-muted-foreground text-[11px] font-normal">
-                My Prompts {isLoading && '(loading...)'}
+                我的提示词 {isLoading && '(加载中...)'}
               </DropdownMenuLabel>
               {prompts.map((prompt) => (
                 <DropdownMenuItem
@@ -367,7 +365,7 @@ function SystemPromptSelector({
                       setPreviewPrompt(prompt)
                     }}
                     className="text-muted-foreground hover:text-foreground ml-2 rounded p-0.5 opacity-0 transition-all group-hover:opacity-100"
-                    title="Preview"
+                    title="预览"
                   >
                     <Eye className="h-3.5 w-3.5" />
                   </button>
@@ -381,7 +379,7 @@ function SystemPromptSelector({
 
           {!isLoading && (!prompts || prompts.length === 0) && (
             <div className="text-muted-foreground px-2 py-3 text-center text-[11px]">
-              No prompts yet. Create one in Prompts page.
+              还没有提示词。请在提示词页面创建。
             </div>
           )}
         </DropdownMenuContent>
@@ -406,7 +404,7 @@ function SystemPromptSelector({
           )}
           <div className="bg-muted/50 max-h-[300px] overflow-y-auto rounded-lg border p-4">
             <pre className="text-muted-foreground text-xs leading-relaxed whitespace-pre-wrap">
-              {previewPrompt?.prompt || '(No prompt content)'}
+              {previewPrompt?.prompt || '（无提示词内容）'}
             </pre>
           </div>
         </DialogContent>
@@ -730,7 +728,7 @@ export default function AgentsPage() {
             <Wrench className="h-3.5 w-3.5 text-white" />
           </div>
           <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-            Agents
+            智能体
           </h1>
         </div>
 
@@ -744,7 +742,7 @@ export default function AgentsPage() {
               className="text-muted-foreground hover:text-foreground h-7 gap-1 text-xs"
             >
               <Trash2 className="h-3 w-3" />
-              <span className="hidden sm:inline">Clear</span>
+              <span className="hidden sm:inline">清空</span>
             </Button>
           )}
         </div>
@@ -771,11 +769,10 @@ export default function AgentsPage() {
               <Wrench className="text-muted-foreground/50 h-7 w-7" />
             </div>
             <p className="text-foreground text-sm font-medium">
-              Agent Chat with Tools
+              工具增强智能体对话
             </p>
             <p className="text-muted-foreground mt-1 text-xs">
-              Try asking me to calculate something, check the time, or get the
-              weather.
+              试试让我计算、查询时间或获取天气信息。
             </p>
           </div>
         ) : (
@@ -822,7 +819,7 @@ export default function AgentsPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything — I can search, calculate, and more..."
+              placeholder="问我任何事 — 我可以搜索、计算等..."
               rows={2}
               disabled={loading}
               className="placeholder:text-muted-foreground/60 flex-1 resize-none bg-transparent p-2 text-sm focus:outline-none disabled:opacity-50"

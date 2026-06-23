@@ -129,7 +129,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           ) : (
             <Copy className="h-3 w-3" />
           )}
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? '已复制！' : '复制'}
         </button>
       </div>
       <div className="bg-[#282c34]">
@@ -204,10 +204,10 @@ function ToolCallCard({ tc }: { tc: ToolCall }) {
         <span className="font-medium">{friendlyName}</span>
         <span className="text-muted-foreground ml-auto">
           {tc.status === 'running'
-            ? 'Running...'
+            ? '运行中...'
             : tc.status === 'finished'
-              ? 'Done'
-              : 'Failed'}
+              ? '完成'
+              : '失败'}
         </span>
         {expanded ? (
           <ChevronUp className="text-muted-foreground h-3 w-3 shrink-0" />
@@ -218,20 +218,20 @@ function ToolCallCard({ tc }: { tc: ToolCall }) {
       {expanded && (
         <div className="space-y-1.5 border-t px-3 py-2">
           <div>
-            <span className="text-muted-foreground">Input: </span>
+            <span className="text-muted-foreground">输入: </span>
             <code className="bg-muted rounded px-1 py-0.5 text-[11px]">
               {JSON.stringify(tc.input)}
             </code>
           </div>
           {tc.output !== undefined && (
             <div>
-              <span className="text-muted-foreground">Output: </span>
+              <span className="text-muted-foreground">输出: </span>
               <span className="line-clamp-4">{String(tc.output)}</span>
             </div>
           )}
           {tc.error && (
             <div className="text-red-500">
-              <span className="text-muted-foreground">Error: </span>
+              <span className="text-muted-foreground">错误: </span>
               {tc.error}
             </div>
           )}
@@ -255,13 +255,13 @@ function SubagentCard({ sa }: { sa: Subagent }) {
           <XCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />
         )}
         <Bot className="text-muted-foreground h-3 w-3 shrink-0" />
-        <span className="font-medium">Subagent: {sa.name}</span>
+        <span className="font-medium">子智能体: {sa.name}</span>
         <span className="text-muted-foreground ml-auto">
           {sa.status === 'running'
-            ? 'Running...'
+            ? '运行中...'
             : sa.status === 'completed'
-              ? 'Completed'
-              : 'Failed'}
+              ? '已完成'
+              : '失败'}
         </span>
       </div>
       {sa.content && (
@@ -295,7 +295,7 @@ function ThinkingBlock({ content }: { content: string }) {
         className="flex w-full items-center gap-2 px-3 py-2 text-left"
       >
         <Brain className="h-3.5 w-3.5 shrink-0 text-purple-500" />
-        <span className="text-muted-foreground font-medium">Thinking</span>
+        <span className="text-muted-foreground font-medium">思考中</span>
         {expanded ? (
           <ChevronUp className="text-muted-foreground ml-auto h-3 w-3 shrink-0" />
         ) : (
@@ -545,7 +545,7 @@ export default function Page() {
       console.error(err)
       updateAssistant(() => ({
         role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
+        content: '抱歉，出了点问题。请重试。',
         thinking: '',
         toolCalls: [],
         subagents: [],
@@ -577,7 +577,7 @@ export default function Page() {
       {/* Header */}
       <div className="mb-4 flex shrink-0 items-center gap-2 sm:mb-6 sm:gap-3">
         <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-          Deep Agent
+          深度智能体
         </h1>
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <input
@@ -586,7 +586,7 @@ export default function Page() {
               setThreadId(e.target.value)
               setMessages([])
             }}
-            placeholder="Thread ID"
+            placeholder="线程 ID"
             className="bg-muted/50 text-muted-foreground focus:ring-primary/30 w-20 rounded-lg border px-1.5 py-1 font-mono text-[9px] focus:ring-1 focus:outline-none sm:w-32 sm:px-2 sm:text-[10px]"
           />
           <button
@@ -596,14 +596,14 @@ export default function Page() {
             }}
             className="text-muted-foreground hover:text-foreground text-[10px] transition-colors"
           >
-            New
+            新建
           </button>
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
           <span className="text-muted-foreground hidden text-xs sm:inline">
-            Online
+            在线
           </span>
         </div>
       </div>
@@ -617,9 +617,7 @@ export default function Page() {
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 text-center">
             <Sparkles className="text-muted-foreground/60 h-8 w-8" />
-            <p className="text-muted-foreground mt-2 text-sm">
-              Ask me anything
-            </p>
+            <p className="text-muted-foreground mt-2 text-sm">随便问我点什么</p>
           </div>
         ) : (
           <div className="space-y-4 px-2 pb-4">
@@ -709,7 +707,7 @@ export default function Page() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything..."
+              placeholder="随便问点什么..."
               rows={2}
               disabled={loading}
               className="placeholder:text-muted-foreground/60 flex-1 resize-none bg-transparent p-2 text-sm focus:outline-none disabled:opacity-50"

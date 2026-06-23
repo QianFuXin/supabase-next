@@ -47,10 +47,10 @@ export function UpdatePasswordForm({
         <div className="via-foreground/20 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent" />
         <CardHeader className="space-y-1 pt-8 pb-6">
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Set new password
+            设置新密码
           </CardTitle>
           <CardDescription className="text-sm">
-            Enter your new password below
+            请输入您的新密码
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,12 +58,12 @@ export function UpdatePasswordForm({
             <div className="flex flex-col gap-5">
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-xs font-medium">
-                  New password
+                  新密码
                 </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter a new password"
+                  placeholder="输入新密码"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +80,7 @@ export function UpdatePasswordForm({
                 className="h-10 w-full"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : 'Save new password'}
+                {isLoading ? '保存中...' : '保存新密码'}
               </Button>
             </div>
           </form>

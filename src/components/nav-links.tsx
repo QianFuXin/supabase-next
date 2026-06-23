@@ -14,13 +14,13 @@ import {
 } from 'lucide-react'
 
 const links = [
-  { href: '/deep-agent', label: 'Deep Agent', icon: MessageSquare },
-  { href: '/agents', label: 'Agents', icon: Wrench },
-  { href: '/chat', label: 'Chat', icon: Sparkles },
-  { href: '/prompts', label: 'Prompts', icon: Terminal },
-  { href: '/prompt-optimizer', label: 'Optimizer', icon: Wand2 },
-  { href: '/notes', label: 'Notes', icon: FileText },
-  { href: '/apikeys', label: 'API Keys', icon: Key },
+  { href: '/deep-agent', label: '深度智能体', icon: MessageSquare },
+  { href: '/agents', label: '智能体', icon: Wrench },
+  { href: '/chat', label: '对话', icon: Sparkles },
+  { href: '/prompts', label: '提示词', icon: Terminal },
+  { href: '/prompt-optimizer', label: '优化器', icon: Wand2 },
+  { href: '/notes', label: '笔记', icon: FileText },
+  { href: '/apikeys', label: 'API 密钥', icon: Key },
 ]
 
 export function NavLinks() {

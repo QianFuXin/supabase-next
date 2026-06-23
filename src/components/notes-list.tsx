@@ -76,9 +76,9 @@ export function NotesList() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
         <p className="text-destructive text-center">
-          Failed to load notes: {error.message}
+          加载笔记失败：{error.message}
         </p>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <Button onClick={() => window.location.reload()}>重试</Button>
       </div>
     )
   }
@@ -88,16 +88,16 @@ export function NotesList() {
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            My Notes
+            我的笔记
           </h1>
           <p className="text-muted-foreground text-sm">
-            {notes?.length || 0} {notes?.length === 1 ? 'note' : 'notes'}
+            {notes?.length || 0} {notes?.length === 1 ? '条笔记' : '条笔记'}
           </p>
         </div>
         <Button onClick={handleCreateClick} className="shrink-0 gap-2">
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New Note</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">新建笔记</span>
+          <span className="sm:hidden">新建</span>
         </Button>
       </div>
 
@@ -116,9 +116,9 @@ export function NotesList() {
       ) : (
         <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-lg border border-dashed">
           <div className="text-center">
-            <p className="text-lg font-medium">No notes yet</p>
+            <p className="text-lg font-medium">还没有笔记</p>
             <p className="text-muted-foreground text-sm">
-              Create your first note to get started
+              创建您的第一条笔记开始使用
             </p>
           </div>
           <Button
@@ -127,7 +127,7 @@ export function NotesList() {
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
-            Create Note
+            创建笔记
           </Button>
         </div>
       )}
@@ -146,13 +146,13 @@ export function NotesList() {
         onOpenChange={(open) => {
           if (!open) setDeletingNoteId(null)
         }}
-        title="Delete note"
+        title="删除笔记"
         description={
           deletingNote
-            ? `Are you sure you want to delete "${deletingNote.title}"? This action cannot be undone.`
-            : 'Are you sure you want to delete this note? This action cannot be undone.'
+            ? `确定要删除"${deletingNote.title}"吗？此操作不可撤销。`
+            : '确定要删除此笔记吗？此操作不可撤销。'
         }
-        confirmText="Delete"
+        confirmText="删除"
         onConfirm={handleConfirmDelete}
         isLoading={deleteNote.isPending}
       />
