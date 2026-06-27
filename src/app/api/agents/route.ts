@@ -1,6 +1,7 @@
 import { createAgent, tool } from 'langchain'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 import { createClient } from '@/supabase/server'
+import { getApiKey } from '@/utils/get-api-key'
 import * as z from 'zod'
 
 const SYSTEM_PROMPT = `You are a helpful AI assistant with access to tools.
@@ -109,19 +110,9 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: apikeys, error: apikeysError } = await supabase
-      .from('apikeys')
-      .select('key')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    if (apikeysError || !apikeys?.key) {
-      return Response.json(
-        { error: 'No active API key found. Please create an API key first.' },
-        { status: 400 },
-      )
+    const apiKeyResult = await getApiKey(supabase, 'gemini')
+    if ('error' in apiKeyResult) {
+      return Response.json({ error: apiKeyResult.error }, { status: 400 })
     }
 
     const {
@@ -139,7 +130,7 @@ export async function POST(req: Request) {
 
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-2.5-flash',
-      apiKey: apikeys.key,
+      apiKey: apiKeyResult.key,
       temperature: 0.7,
       maxOutputTokens: 4096,
     })

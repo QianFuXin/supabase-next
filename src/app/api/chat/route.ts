@@ -5,6 +5,7 @@ import {
   SystemMessage,
 } from '@langchain/core/messages'
 import { createClient } from '@/supabase/server'
+import { getApiKey } from '@/utils/get-api-key'
 
 const DEFAULT_SYSTEM_PROMPT = `You are a helpful AI assistant powered by Google's Gemma 4 model.
 You provide clear, concise, and accurate answers.
@@ -38,24 +39,14 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: apikeys, error: apikeysError } = await supabase
-      .from('apikeys')
-      .select('key')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    if (apikeysError || !apikeys?.key) {
-      return Response.json(
-        { error: 'No active API key found. Please create an API key first.' },
-        { status: 400 },
-      )
+    const apiKeyResult = await getApiKey(supabase, 'gemini')
+    if ('error' in apiKeyResult) {
+      return Response.json({ error: apiKeyResult.error }, { status: 400 })
     }
 
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-3.1-flash-lite',
-      apiKey: apikeys.key,
+      apiKey: apiKeyResult.key,
       temperature: 0.7,
       maxOutputTokens: 2048,
     })
