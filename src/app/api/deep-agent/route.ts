@@ -2,14 +2,13 @@ import { createClient } from '@/supabase/server'
 import { createDeepAgent, StateBackend } from 'deepagents'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 import { MemorySaver } from '@langchain/langgraph-checkpoint'
+import { getApiKey } from '@/utils/get-api-key'
+
+const DEEP_AGENT_MODEL = 'gemma-4-26b-a4b-it'
 
 const SYSTEM_PROMPT = `You are a helpful, friendly AI assistant. You provide clear, concise, and accurate answers.
 Use markdown formatting for code blocks, lists, tables, and emphasis.
 For complex multi-step tasks, use write_todos to plan, then execute step by step.`
-
-const model = new ChatGoogleGenerativeAI({
-  model: 'gemma-4-26b-a4b-it',
-})
 
 const checkpointer = new MemorySaver()
 const backend = new StateBackend()
@@ -33,26 +32,17 @@ type StreamEvent =
   | { type: 'done' }
   | { type: 'error'; error: string }
 
-let _agent: ReturnType<typeof createDeepAgent> | null = null
-
-function getAgent() {
-  if (!_agent) {
-    _agent = createDeepAgent({
-      model,
-      systemPrompt: SYSTEM_PROMPT,
-      checkpointer,
-      backend,
-    })
-  }
-  return _agent
-}
-
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.getClaims()
     if (error || !data?.claims) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const apiKeyResult = await getApiKey(supabase, 'gemini')
+    if ('error' in apiKeyResult) {
+      return Response.json({ error: apiKeyResult.error }, { status: 400 })
     }
 
     const { question, thread_id } = await req.json()
@@ -64,7 +54,17 @@ export async function POST(req: Request) {
       )
     }
 
-    const agent = getAgent()
+    const model = new ChatGoogleGenerativeAI({
+      model: DEEP_AGENT_MODEL,
+      apiKey: apiKeyResult.key,
+    })
+
+    const agent = createDeepAgent({
+      model,
+      systemPrompt: SYSTEM_PROMPT,
+      checkpointer,
+      backend,
+    })
 
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
