@@ -84,7 +84,10 @@ interface StreamEvent {
 
 const DEFAULT_SYSTEM_PROMPT = `You are a helpful AI assistant with access to tools.
 You provide clear, concise, and accurate answers.
-Use markdown formatting for code blocks, lists, tables, and emphasis when appropriate.`
+Use markdown formatting for code blocks, lists, tables, and emphasis when appropriate.
+When asked about current time or date, use the get_current_time tool.
+When asked to search, look up, or find information, use the tavily_search tool.
+When asked to read, fetch, or extract content from a specific web page URL, use the fetch_web_page tool.`
 
 function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false)
@@ -772,7 +775,7 @@ export default function AgentsPage() {
               工具增强智能体对话
             </p>
             <p className="text-muted-foreground mt-1 text-xs">
-              试试让我计算、查询时间或获取天气信息。
+              试试让我搜索信息、查询时间或读取网页内容。
             </p>
           </div>
         ) : (
@@ -819,7 +822,7 @@ export default function AgentsPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="问我任何事 — 我可以搜索、计算等..."
+              placeholder="问我任何事 — 我可以搜索网络、查询时间..."
               rows={2}
               disabled={loading}
               className="placeholder:text-muted-foreground/60 flex-1 resize-none bg-transparent p-2 text-sm focus:outline-none disabled:opacity-50"

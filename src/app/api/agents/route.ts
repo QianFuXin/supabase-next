@@ -7,85 +7,99 @@ import * as z from 'zod'
 const SYSTEM_PROMPT = `You are a helpful AI assistant with access to tools.
 You provide clear, concise, and accurate answers.
 Use markdown formatting for code blocks, lists, tables, and emphasis when appropriate.
-When you need to calculate something, use the calculator tool.
-When asked about time, use the get_current_time tool.
-When asked about weather, use the get_weather tool.`
-
-const calculator = tool(
-  async ({ expression }) => {
-    try {
-      const result = Function(`"use strict"; return (${expression})`)()
-      return String(result)
-    } catch (e) {
-      return `Error: ${(e as Error).message}`
-    }
-  },
-  {
-    name: 'calculator',
-    description:
-      'Evaluate a mathematical expression. Supports basic arithmetic, parentheses, and Math functions (Math.sqrt, Math.pow, Math.sin, etc.).',
-    schema: z.object({
-      expression: z
-        .string()
-        .describe('The mathematical expression to evaluate, e.g. "2 + 2 * 3"'),
-    }),
-  },
-)
+When asked about current time or date, use the get_current_time tool.
+When asked to search, look up, or find information, use the tavily_search tool.
+When asked to read, fetch, or extract content from a specific web page URL, use the fetch_web_page tool.`
 
 const getCurrentTime = tool(
-  async ({ timezone }) => {
-    try {
-      return new Date().toLocaleString('en-US', {
-        timeZone: timezone || 'UTC',
-        dateStyle: 'full',
-        timeStyle: 'long',
-      })
-    } catch {
-      return new Date().toISOString()
-    }
+  async () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    const seconds = String(now.getSeconds()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   },
   {
     name: 'get_current_time',
-    description:
-      'Get the current date and time. Optionally specify an IANA timezone.',
-    schema: z.object({
-      timezone: z
-        .string()
-        .optional()
-        .describe(
-          'IANA timezone name, e.g. "America/New_York", "Asia/Shanghai". Defaults to UTC.',
-        ),
-    }),
+    description: 'Get the current date and time in YYYY-MM-DD HH:MM:SS format.',
+    schema: z.object({}),
   },
 )
 
-const getWeather = tool(
-  async ({ location }) => {
-    const conditions = [
-      'Sunny',
-      'Cloudy',
-      'Rainy',
-      'Partly Cloudy',
-      'Clear',
-    ] as const
-    const temp = Math.floor(Math.random() * 30) + 5
-    const condition = conditions[Math.floor(Math.random() * conditions.length)]
-    const humidity = Math.floor(Math.random() * 40) + 40
-    return `Weather in ${location}: ${condition}, ${temp}°C, humidity ${humidity}%`
+const fetchWebPage = tool(
+  async ({ url, maxLength }) => {
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; AgentBot/1.0)',
+        },
+      })
+      clearTimeout(timeout)
+
+      if (!response.ok) {
+        return `Failed to fetch ${url}: HTTP ${response.status} ${response.statusText}`
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('text/html')) {
+        return `URL content type is "${contentType}", not HTML. Cannot extract text.`
+      }
+
+      const html = await response.text()
+
+      // Strip script and style tags with their content
+      const noScripts = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      const noStyles = noScripts.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+
+      // Strip all HTML tags
+      const text = noStyles.replace(/<[^>]+>/g, ' ')
+
+      // Decode common HTML entities
+      const decoded = text
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+
+      // Normalize whitespace
+      const normalized = decoded.replace(/\s+/g, ' ').trim()
+
+      const limit = maxLength ?? 5000
+      const result =
+        normalized.length > limit
+          ? normalized.slice(0, limit) + '...'
+          : normalized
+
+      return result || `No readable text content found at ${url}`
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') {
+        return `Fetch timed out for ${url} (15s limit)`
+      }
+      return `Fetch failed for ${url}: ${(err as Error).message}`
+    }
   },
   {
-    name: 'get_weather',
+    name: 'fetch_web_page',
     description:
-      'Get the current weather for a location (simulated). In production, connect to a real weather API.',
+      'Fetch and extract text content from a web page URL. Returns cleaned text without HTML tags, scripts, or styles. Useful for reading articles, documentation, or any web page content.',
     schema: z.object({
-      location: z
-        .string()
-        .describe('The city or location name to get weather for'),
+      url: z.string().describe('The full URL of the web page to fetch'),
+      maxLength: z
+        .number()
+        .optional()
+        .describe('Maximum characters to return (default: 5000)'),
     }),
   },
 )
-
-const AGENT_TOOLS = [calculator, getCurrentTime, getWeather]
 
 type StreamEvent =
   | { type: 'text'; content: string }
@@ -102,6 +116,19 @@ type StreamEvent =
   | { type: 'done' }
   | { type: 'error'; error: string }
 
+interface TavilyResult {
+  title: string
+  url: string
+  content: string
+  score: number
+}
+
+interface TavilyResponse {
+  query: string
+  answer?: string
+  results: TavilyResult[]
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
@@ -110,10 +137,80 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const apiKeyResult = await getApiKey(supabase, 'gemini')
-    if ('error' in apiKeyResult) {
-      return Response.json({ error: apiKeyResult.error }, { status: 400 })
+    const [geminiKeyResult, tavilyKeyResult] = await Promise.all([
+      getApiKey(supabase, 'gemini'),
+      getApiKey(supabase, 'tavily'),
+    ])
+
+    if ('error' in geminiKeyResult) {
+      return Response.json({ error: geminiKeyResult.error }, { status: 400 })
     }
+
+    const tavilyApiKey = 'error' in tavilyKeyResult ? '' : tavilyKeyResult.key
+
+    const tavilySearch = tool(
+      async ({ query, maxResults, searchDepth }) => {
+        try {
+          const response = await fetch('https://api.tavily.com/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              api_key: tavilyApiKey,
+              query,
+              max_results: maxResults ?? 5,
+              search_depth: searchDepth ?? 'basic',
+            }),
+          })
+
+          if (!response.ok) {
+            const errorText = await response.text()
+            return `Tavily search error (${response.status}): ${errorText}`
+          }
+
+          const data: TavilyResponse = await response.json()
+
+          if (!data.results?.length) {
+            return data.answer
+              ? `Answer: ${data.answer}\n\nNo search results found.`
+              : `No results found for "${data.query}".`
+          }
+
+          const lines: string[] = []
+
+          if (data.answer) {
+            lines.push(`**Answer:** ${data.answer}`, '')
+          }
+
+          lines.push(`**Search results for "${data.query}":**`, '')
+
+          data.results.forEach((r, i) => {
+            lines.push(`${i + 1}. **[${r.title}](${r.url})**`)
+            lines.push(`   ${r.content}`)
+            lines.push('')
+          })
+
+          return lines.join('\n')
+        } catch (err) {
+          return `Tavily search failed: ${(err as Error).message}`
+        }
+      },
+      {
+        name: 'tavily_search',
+        description:
+          'Search the web using Tavily API. Returns real-time search results with titles, URLs, and content snippets. Useful for finding current information, facts, and news.',
+        schema: z.object({
+          query: z.string().describe('The search query string'),
+          maxResults: z
+            .number()
+            .optional()
+            .describe('Maximum number of results to return (default: 5)'),
+          searchDepth: z
+            .enum(['basic', 'advanced'])
+            .optional()
+            .describe('Search depth: "basic" (default) or "advanced"'),
+        }),
+      },
+    )
 
     const {
       messages,
@@ -130,14 +227,14 @@ export async function POST(req: Request) {
 
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-2.5-flash',
-      apiKey: apiKeyResult.key,
+      apiKey: geminiKeyResult.key,
       temperature: 0.7,
       maxOutputTokens: 4096,
     })
 
     const agent = createAgent({
       model,
-      tools: AGENT_TOOLS,
+      tools: [getCurrentTime, fetchWebPage, tavilySearch],
       systemPrompt: SYSTEM_PROMPT,
     })
 
